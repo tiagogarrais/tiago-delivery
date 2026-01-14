@@ -6,6 +6,13 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
 
 ### Para Empresas/Usuários
 
+- **Autenticação**
+  - Página de login independente (`/login`)
+  - Login com Google OAuth
+  - Magic Link via email
+  - Redirecionamento automático após autenticação
+  - Proteção de rotas que requerem autenticação
+
 - **Gestão de Lojas**
 
   - Cadastro de múltiplas lojas por usuário
@@ -27,6 +34,12 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
   - Gerenciamento de múltiplos endereços
   - Dashboard com abas para lojas e dados pessoais
   - Visualização de todas as lojas cadastradas
+
+- **Carrinho de Compras**
+  - Adição de produtos ao carrinho
+  - Gestão de itens no carrinho
+  - Redirecionamento para login se não autenticado
+  - Retorno automático após login
 
 ### Sistema
 
@@ -58,8 +71,8 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
 1. **Clone o repositório**
 
    ```bash
-   git clone https://github.com/seu-usuario/delivery.git
-   cd delivery
+   git clone https://github.com/tiagogarrais/tiago-delivery.git
+   cd tiago-delivery
    ```
 
 2. **Instale as dependências**
@@ -70,26 +83,27 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
 
 3. **Configure as variáveis de ambiente**
 
-   - Copie o arquivo `.env.example` para `.env`
+   - Copie o arquivo `.env.example` para `.env.local`
    - Preencha as variáveis necessárias:
      ```env
-     DATABASE_URL=postgresql://usuario:senha@localhost:5432/tiago_delivery
+     DATABASE_URL=postgresql://usuario:senha@localhost:5433/tiago_delivery
      NEXTAUTH_URL=http://localhost:3000
      NEXTAUTH_SECRET=seu-secret-aleatorio-aqui
      GOOGLE_CLIENT_ID=seu-client-id.apps.googleusercontent.com
      GOOGLE_CLIENT_SECRET=seu-client-secret
+     EMAIL_SERVER_HOST=smtp.gmail.com
+     EMAIL_SERVER_PORT=587
+     EMAIL_SERVER_USER=seu@email.com
+     EMAIL_SERVER_PASS=sua-senha-de-app
+     EMAIL_FROM=seu@email.com
      ```
+   
+   - **IMPORTANTE**: Nunca commite o arquivo `.env.local` no git! Ele está protegido pelo `.gitignore`
 
-4. **Configure o banco de dados**
-
-   - Execute as migrações:
-     ```bash
-     npx prisma migrate deploy
-     ```
-   - Gere o cliente Prisma:
-     ```bash
-     npx prisma generate
-     ```
+4. **Gere o NEXTAUTH_SECRET**
+   ```bash
+   openssl rand -base64 32
+   ```
 
 5. **Configure o Google OAuth**
    - Acesse [Google Cloud Console](https://console.cloud.google.com/)
@@ -105,7 +119,21 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
 npm run dev
 ```
 
-Acesse [http://localhost:3000](http://localhost:3000)
+Este comando irá automaticamente:
+- ✅ Iniciar os containers Docker (PostgreSQL)
+- ✅ Gerar o Prisma Client
+- ✅ Aplicar as migrações do banco de dados
+- ✅ Iniciar o servidor Next.js em [http://localhost:3000](http://localhost:3000)
+
+### Comandos Úteis
+
+```bash
+npm run docker:start   # Inicia apenas os containers Docker
+npm run docker:stop    # Para os containers Docker
+npm run docker:logs    # Visualiza logs dos containers
+npm run prisma:migrate # Cria e aplica migrações em desenvolvimento
+npx prisma studio      # Abre interface visual do banco de dados
+```
 
 ### Produção
 
@@ -113,6 +141,24 @@ Acesse [http://localhost:3000](http://localhost:3000)
 npm run build
 npm start
 ```
+
+## ⚠️ Segurança
+
+### Arquivos Sensíveis Protegidos
+
+Os seguintes arquivos **NÃO DEVEM** ser commitados e estão protegidos pelo `.gitignore`:
+- ✅ `.env.local` - Contém credenciais e secrets
+- ✅ `.env` - Variáveis de ambiente
+- ✅ `node_modules/` - Dependências
+- ✅ `.next/` - Build do Next.js
+
+### Boas Práticas
+
+1. **Nunca exponha suas credenciais** em código fonte
+2. **Use o arquivo `.env.local`** para desenvolvimento local
+3. **Gere um NEXTAUTH_SECRET único** para produção
+4. **A senha do Docker Compose** (`password123`) é apenas para desenvolvimento local
+5. **Em produção**, use serviços gerenciados ou Docker secrets para credenciais
 
 ## Estrutura do Projeto
 
@@ -122,15 +168,19 @@ src/
 │   ├── api/               # API Routes
 │   │   ├── auth/          # NextAuth.js
 │   │   ├── addresses/     # API de endereços
+│   │   ├── cart/          # API do carrinho
 │   │   ├── countries/     # API de países
-│   │   ├── onboarding/    # API de onboarding
+│   │   ├── pix-keys/      # API de chaves PIX
 │   │   ├── profile/       # API de perfil
 │   │   ├── stores/        # API de lojas
 │   │   │   └── [id]/      # Operações por loja (PUT, DELETE)
 │   │   └── products/      # API de produtos
 │   │       └── [id]/      # Operações por produto (PUT, DELETE)
-│   ├── onboarding/        # Página de onboarding
-│   ├── profile/           # Página de perfil com abas
+│   ├── login/             # Página de login independente
+│   ├── painel/            # Painel do usuário
+│   ├── carrinho/          # Página do carrinho
+│   ├── lojas/             # Listagem de lojas
+│   ├── produtos/          # Listagem de produtos
 │   ├── store/             # Página de cadastro/edição de lojas
 │   ├── products/          # Gestão de produtos
 │   │   ├── page.js        # Listagem de produtos
@@ -140,31 +190,46 @@ src/
 │   ├── layout.js          # Layout principal
 │   └── page.js            # Página inicial
 ├── components/            # Componentes reutilizáveis
+│   ├── AddressForm.js     # Formulário de endereços
 │   └── StoreForm.js       # Formulário de loja com ViaCEP
 ├── lib/                   # Utilitários
 │   ├── auth.js            # Configuração NextAuth
+│   ├── email.js           # Configuração de email
 │   └── prisma.js          # Cliente Prisma
 prisma/
 ├── schema.prisma          # Schema do banco
-│                          # (User, Usuario, Store, Product)
+│                          # (User, Store, Product, Cart, CartItem)
 └── migrations/            # Migrações
+    ├── 20260113190720_init
     ├── 20260113221049_add_store_fields
     ├── 20260113224538_allow_multiple_stores_per_user
-    └── 20260113232743_add_products
+    ├── 20260113232743_add_products
+    └── 20260114054337_add_cart_and_cart_items
 public/
 └── estados-cidades2.json  # Dados de estados brasileiros
 ```
 
 ## Scripts Disponíveis
 
-- `npm run dev` - Inicia o servidor de desenvolvimento
+- `npm run dev` - Inicia Docker, banco de dados e servidor de desenvolvimento
 - `npm run build` - Build para produção
 - `npm start` - Inicia o servidor de produção
+- `npm run docker:start` - Inicia apenas os containers Docker
+- `npm run docker:stop` - Para os containers Docker
+- `npm run docker:logs` - Visualiza logs dos containers
 - `npx prisma generate` - Gera o cliente Prisma
 - `npx prisma migrate dev` - Cria e aplica migrações em desenvolvimento
 - `npx prisma studio` - Abre interface visual do banco de dados
 
 ## Funcionalidades Implementadas
+
+### Autenticação e Segurança
+
+- ✅ Página de login independente com redirecionamento
+- ✅ Login com Google OAuth
+- ✅ Magic Link via email
+- ✅ Proteção de rotas autenticadas
+- ✅ Redirecionamento automático após login
 
 ### Gestão de Lojas
 
@@ -187,11 +252,22 @@ public/
 
 ### Perfil e Autenticação
 
-- ✅ Login com Google OAuth
+- ✅ Login com Google OAuth e Magic Link
+- ✅ Página de login independente (`/login`)
 - ✅ Perfil com abas (Dados Pessoais, Endereços, Lojas)
 - ✅ Atualização de dados pessoais
 - ✅ Gerenciamento de múltiplos endereços
 - ✅ Máscaras para CPF e telefone
+- ✅ Redirecionamento inteligente após login
+
+### Carrinho de Compras
+
+- ✅ Adicionar produtos ao carrinho
+- ✅ Atualizar quantidade de itens
+- ✅ Remover itens do carrinho
+- ✅ Limpar carrinho completo
+- ✅ Cálculo automático de subtotais e total
+- ✅ Proteção: redireciona para login se não autenticado
 
 ## Modelo de Dados
 
