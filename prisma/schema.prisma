@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  image     String?
+  emailVerified DateTime?
+  accounts  Account[]
+  sessions  Session[]
+  profile   Usuario?
+  stores    Store[]
+  carts     Cart[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model Usuario {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  fullName             String?
+  birthDate            DateTime?
+  cpf                  String?
+  whatsapp             String?
+  whatsappCountryCode  String?
+  whatsappConsent      Boolean   @default(false)
+  isClient             Boolean   @default(false)
+  isStore              Boolean   @default(false)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addresses Address[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id           String  @id @default(cuid())
+  usuarioId    String
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  zipCode      String
+  isPrimary    Boolean @default(false)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Store {
+  id          String  @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  category    String
+  cnpj        String  @unique
+  phone       String
+  email       String
+
+  // Endereço da loja
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  zipCode      String
+
+  // Configurações de pedido
+  minimumOrder    Float? // Valor mínimo de compras
+  deliveryFee     Float? // Taxa de entrega
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products Product[]
+  pixKeys  PixKey[]
+  carts    Cart[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PixKey {
+  id        String  @id @default(cuid())
+  storeId   String
+  type      String  // cpf, cnpj, email, phone, random
+  key       String
+  isPrimary Boolean @default(false)
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  storeId     String
+  name        String
+  description String?
+  price       Float
+  image       String?
+  available   Boolean @default(true)
+
+  store     Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String?
+  sessionId String?
+  storeId   String
+
+  user  User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, storeId])
+  @@unique([sessionId, storeId])
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int    @default(1)
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+}
