@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npm run docker:start && dotenv -e .env.local -- prisma generate && dotenv -e .env.local -- prisma migrate deploy && next dev -p 3000",
     "build": "prisma generate && next build",
-    "vercel-build": "prisma generate && prisma db push --accept-data-loss && next build",
+    "vercel-build": "prisma generate && prisma migrate reset --force --skip-seed && next build",
     "start": "next start -p 3000",
     "docker:start": "docker-compose up -d && sleep 5",
     "docker:stop": "docker-compose down",
