@@ -3,11 +3,11 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { IMaskInput } from "react-imask";
 import AddressForm from "../../components/AddressForm";
 
-export default function Profile() {
+function ProfileContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1160,5 +1160,19 @@ export default function Profile() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function Profile() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <p className="text-lg">Carregando...</p>
+        </div>
+      }
+    >
+      <ProfileContent />
+    </Suspense>
   );
 }

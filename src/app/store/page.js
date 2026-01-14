@@ -3,11 +3,11 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import StoreForm from "../../components/StoreForm";
 import { IMaskInput } from "react-imask";
 
-export default function StorePage() {
+function StorePageContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1045,5 +1045,13 @@ export default function StorePage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function StorePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><p className="text-lg">Carregando...</p></div>}>
+      <StorePageContent />
+    </Suspense>
   );
 }
