@@ -9,10 +9,12 @@ O projeto está configurado para build na Vercel, mas você precisa configurar u
 ### Opção 1: Vercel Postgres (Recomendado)
 
 1. **Acesse seu projeto na Vercel**
+
    - Vá para https://vercel.com/dashboard
    - Selecione seu projeto
 
 2. **Adicione Vercel Postgres**
+
    - Clique na aba "Storage"
    - Clique em "Create Database"
    - Selecione "Postgres"
@@ -20,6 +22,7 @@ O projeto está configurado para build na Vercel, mas você precisa configurar u
    - Clique em "Create"
 
 3. **Conecte ao seu projeto**
+
    - A Vercel automaticamente adicionará as variáveis de ambiente necessárias
    - `POSTGRES_URL`
    - `POSTGRES_PRISMA_URL` (use esta no DATABASE_URL)
@@ -37,10 +40,12 @@ O projeto está configurado para build na Vercel, mas você precisa configurar u
 1. **Crie uma conta em https://neon.tech**
 
 2. **Crie um novo projeto**
+
    - Nome: tiago-delivery-prod
    - Região: escolha a mais próxima
 
 3. **Copie a Connection String**
+
    - Formato: `postgresql://user:password@host/database?sslmode=require`
 
 4. **Adicione na Vercel**
@@ -53,6 +58,7 @@ O projeto está configurado para build na Vercel, mas você precisa configurar u
 1. **Crie um projeto em https://supabase.com**
 
 2. **Obtenha a Connection String**
+
    - Project Settings → Database
    - Connection string (URI)
 
@@ -141,15 +147,18 @@ Não esqueça de adicionar sua URL de produção nas URIs autorizadas:
 ## 🐛 Troubleshooting
 
 ### Erro: "Can't reach database server"
+
 - Verifique se a `DATABASE_URL` está correta
 - Confirme que o banco aceita conexões SSL
 - Adicione `?sslmode=require` ao final da URL se necessário
 
 ### Erro: "Table doesn't exist"
+
 - Execute as migrações: `prisma migrate deploy`
 - Ou adicione o script `vercel-build` no package.json
 
 ### Erro: "Invalid OAuth redirect"
+
 - Adicione a URL da Vercel no Google Cloud Console
 - Atualize `NEXTAUTH_URL` com o domínio correto
 

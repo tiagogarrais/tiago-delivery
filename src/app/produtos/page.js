@@ -434,7 +434,13 @@ function ProdutosPageContent() {
 
 export default function ProdutosPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><p className="text-lg">Carregando...</p></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <p className="text-lg">Carregando...</p>
+        </div>
+      }
+    >
       <ProdutosPageContent />
     </Suspense>
   );
