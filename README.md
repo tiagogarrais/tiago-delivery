@@ -7,6 +7,7 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
 ### Para Empresas/Usuários
 
 - **Autenticação**
+
   - Página de login independente (`/login`)
   - Login com Google OAuth
   - Magic Link via email
@@ -30,6 +31,7 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
   - Sistema de exclusão com confirmação
 
 - **Perfil de Usuário**
+
   - Atualização de dados pessoais (nome, CPF, telefone)
   - Gerenciamento de múltiplos endereços
   - Dashboard com abas para lojas e dados pessoais
@@ -85,6 +87,7 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
 
    - Copie o arquivo `.env.example` para `.env.local`
    - Preencha as variáveis necessárias:
+
      ```env
      DATABASE_URL=postgresql://usuario:senha@localhost:5433/tiago_delivery
      NEXTAUTH_URL=http://localhost:3000
@@ -97,10 +100,11 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
      EMAIL_SERVER_PASS=sua-senha-de-app
      EMAIL_FROM=seu@email.com
      ```
-   
+
    - **IMPORTANTE**: Nunca commite o arquivo `.env.local` no git! Ele está protegido pelo `.gitignore`
 
 4. **Gere o NEXTAUTH_SECRET**
+
    ```bash
    openssl rand -base64 32
    ```
@@ -120,6 +124,7 @@ npm run dev
 ```
 
 Este comando irá automaticamente:
+
 - ✅ Iniciar os containers Docker (PostgreSQL)
 - ✅ Gerar o Prisma Client
 - ✅ Aplicar as migrações do banco de dados
@@ -147,6 +152,7 @@ npm start
 ### Arquivos Sensíveis Protegidos
 
 Os seguintes arquivos **NÃO DEVEM** ser commitados e estão protegidos pelo `.gitignore`:
+
 - ✅ `.env.local` - Contém credenciais e secrets
 - ✅ `.env` - Variáveis de ambiente
 - ✅ `node_modules/` - Dependências
