@@ -106,6 +106,7 @@ model Store {
   id          String  @id @default(cuid())
   userId      String
   name        String
+  slug        String? @unique
   description String?
   category    String
   cnpj        String  @unique

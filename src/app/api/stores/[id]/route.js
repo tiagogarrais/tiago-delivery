@@ -28,6 +28,7 @@ export async function PUT(request, { params }) {
 
     const {
       name,
+      slug,
       description,
       category,
       cnpj,
@@ -43,6 +44,17 @@ export async function PUT(request, { params }) {
     // Validar campos obrigatórios
     if (!name || name.trim() === "") {
       errors.push("Nome da loja é obrigatório");
+    }
+    if (!slug || slug.trim() === "") {
+      errors.push("Identificação única é obrigatória");
+    } else {
+      // Validar formato do slug
+      const slugRegex = /^[a-z0-9]+$/;
+      if (!slugRegex.test(slug)) {
+        errors.push(
+          "Identificação deve conter apenas letras minúsculas e números"
+        );
+      }
     }
     if (!category || category.trim() === "") {
       errors.push("Categoria é obrigatória");
@@ -110,6 +122,17 @@ export async function PUT(request, { params }) {
         { errors: ["Você não tem permissão para editar esta loja"] },
         { status: 403 }
       );
+    }
+
+    // Verificar se o slug está sendo alterado (não permitido)
+    if (slug.trim() !== existingStore.slug) {
+      errors.push(
+        "A identificação única da loja não pode ser alterada após a criação"
+      );
+    }
+
+    if (errors.length > 0) {
+      return NextResponse.json({ errors }, { status: 400 });
     }
 
     console.log("Atualizando loja...");

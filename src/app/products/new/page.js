@@ -70,7 +70,7 @@ function NewProductPageContent() {
       if (response.ok) {
         setSuccessMessage("Produto cadastrado com sucesso!");
         setTimeout(() => {
-          router.push(`/products?storeId=${storeId}`);
+          router.push(`/produtos?storeId=${storeId}`);
         }, 2000);
       } else {
         const errorData = await response.json();
@@ -85,7 +85,7 @@ function NewProductPageContent() {
   };
 
   const handleCancel = () => {
-    router.push(`/products?storeId=${storeId}`);
+    router.push(`/produtos?storeId=${storeId}`);
   };
 
   if (status === "loading") {
@@ -136,7 +136,7 @@ function NewProductPageContent() {
                 Painel
               </Link>
               <Link
-                href={`/products?storeId=${storeId}`}
+                href={`/produtos?storeId=${storeId}`}
                 className="text-blue-600 font-semibold"
               >
                 Produtos
@@ -145,7 +145,7 @@ function NewProductPageContent() {
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Olá, {session?.user?.name}</span>
               <Link
-                href={`/products?storeId=${storeId}`}
+                href={`/produtos?storeId=${storeId}`}
                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
               >
                 Voltar

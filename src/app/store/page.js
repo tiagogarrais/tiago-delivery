@@ -66,6 +66,7 @@ function StorePageContent() {
           if (store) {
             setInitialData({
               name: store.name,
+              slug: store.slug,
               description: store.description || "",
               category: store.category,
               cnpj: store.cnpj,

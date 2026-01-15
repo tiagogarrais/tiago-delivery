@@ -3,9 +3,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get("slug");
 
     // Buscar ID do usuário se estiver logado
     let currentUserId = null;
@@ -18,6 +20,28 @@ export async function GET() {
       }
     } else if (session?.user?.id) {
       currentUserId = session.user.id;
+    }
+
+    // Se foi passado um slug, buscar apenas essa loja
+    if (slug) {
+      const store = await prisma.store.findUnique({
+        where: { slug: slug.trim() },
+      });
+
+      if (!store) {
+        return NextResponse.json(
+          { error: "Loja não encontrada" },
+          { status: 404 }
+        );
+      }
+
+      // Adicionar flag isOwner se houver usuário logado
+      const storeWithOwnership = {
+        ...store,
+        isOwner: currentUserId ? store.userId === currentUserId : false,
+      };
+
+      return NextResponse.json({ stores: [storeWithOwnership] });
     }
 
     // Retornar todas as lojas (públicas), mas incluir informação se é do usuário atual
@@ -61,6 +85,7 @@ export async function POST(request) {
     const body = await request.json();
     const {
       name,
+      slug,
       description,
       category,
       cnpj,
@@ -78,6 +103,25 @@ export async function POST(request) {
     // Validar campos obrigatórios
     if (!name || name.trim() === "") {
       errors.push("Nome da loja é obrigatório");
+    }
+    if (!slug || slug.trim() === "") {
+      errors.push("Identificação única é obrigatória");
+    } else {
+      // Validar formato do slug
+      const slugRegex = /^[a-z0-9]+$/;
+      if (!slugRegex.test(slug)) {
+        errors.push(
+          "Identificação deve conter apenas letras minúsculas e números"
+        );
+      } else {
+        // Verificar se slug já existe
+        const existingStore = await prisma.store.findUnique({
+          where: { slug: slug.trim() },
+        });
+        if (existingStore) {
+          errors.push("Esta identificação já está em uso");
+        }
+      }
     }
     if (!category || category.trim() === "") {
       errors.push("Categoria é obrigatória");
@@ -124,6 +168,7 @@ export async function POST(request) {
     console.log("Criando loja com os dados:", {
       userId: session.user.id,
       name: name.trim(),
+      slug: slug.trim(),
       category: category.trim(),
       cnpj: cnpj.trim(),
       phone: phone.trim(),
@@ -141,6 +186,7 @@ export async function POST(request) {
       data: {
         userId: session.user.id,
         name: name.trim(),
+        slug: slug.trim(),
         description: description?.trim() || null,
         category: category.trim(),
         cnpj: cnpj.trim(),
@@ -157,8 +203,6 @@ export async function POST(request) {
         zipCode: address.zipCode.trim(),
       },
     });
-
-    console.log("Loja criada com sucesso:", store);
 
     return NextResponse.json({ store }, { status: 201 });
   } catch (error) {
@@ -201,13 +245,58 @@ export async function PUT(request) {
     }
 
     const body = await request.json();
-    const { name, description, category, cnpj, phone, email, address } = body;
+    const {
+      id,
+      name,
+      slug,
+      description,
+      category,
+      cnpj,
+      phone,
+      email,
+      address,
+    } = body;
 
     const errors = [];
+
+    // Buscar loja atual para validação
+    const currentStore = await prisma.store.findUnique({
+      where: { id },
+    });
+
+    if (!currentStore) {
+      return NextResponse.json(
+        { error: "Loja não encontrada" },
+        { status: 404 }
+      );
+    }
+
+    if (currentStore.userId !== session.user.id) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
+    }
 
     // Validar campos obrigatórios
     if (!name || name.trim() === "") {
       errors.push("Nome da loja é obrigatório");
+    }
+    if (!slug || slug.trim() === "") {
+      errors.push("Identificação única é obrigatória");
+    } else {
+      // Validar formato do slug
+      const slugRegex = /^[a-z0-9]+$/;
+      if (!slugRegex.test(slug)) {
+        errors.push(
+          "Identificação deve conter apenas letras minúsculas e números"
+        );
+      } else if (slug.trim() !== currentStore.slug) {
+        // Verificar se slug já existe (apenas se mudou)
+        const existingStore = await prisma.store.findUnique({
+          where: { slug: slug.trim() },
+        });
+        if (existingStore) {
+          errors.push("Esta identificação já está em uso");
+        }
+      }
     }
     if (!category || category.trim() === "") {
       errors.push("Categoria é obrigatória");
@@ -267,6 +356,7 @@ export async function PUT(request) {
       where: { userId: session.user.id },
       data: {
         name: name.trim(),
+        slug: slug.trim(),
         description: description?.trim() || null,
         category: category.trim(),
         cnpj: cnpj.trim(),

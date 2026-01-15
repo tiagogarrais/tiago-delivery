@@ -295,7 +295,7 @@ export default function CarrinhoPage() {
                       </p>
                     </div>
                     <Link
-                      href={`/products?storeId=${cart.store.id}`}
+                      href={`/produtos?storeId=${cart.store.id}`}
                       className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
                     >
                       + Adicionar mais itens

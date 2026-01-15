@@ -2,13 +2,12 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 
 function LojasContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,25 +15,17 @@ function LojasContent() {
   const [cidade, setCidade] = useState(null);
   const [estado, setEstado] = useState(null);
 
-  // Carregar localização dos parâmetros ou localStorage
+  // Carregar localização do localStorage
   useEffect(() => {
-    const cidadeParam = searchParams.get("cidade");
-    const estadoParam = searchParams.get("estado");
+    // Tentar ler do localStorage
+    const savedCity = localStorage.getItem("selectedCity");
+    const savedState = localStorage.getItem("selectedState");
 
-    if (cidadeParam && estadoParam) {
-      setCidade(cidadeParam);
-      setEstado(estadoParam);
-    } else {
-      // Tentar ler do localStorage
-      const savedCity = localStorage.getItem("selectedCity");
-      const savedState = localStorage.getItem("selectedState");
-
-      if (savedCity && savedState) {
-        setCidade(savedCity);
-        setEstado(savedState);
-      }
+    if (savedCity && savedState) {
+      setCidade(savedCity);
+      setEstado(savedState);
     }
-  }, [searchParams]);
+  }, []);
 
   // Carregar dados de estados para converter código em nome
   useEffect(() => {
@@ -141,20 +132,6 @@ function LojasContent() {
                 Tiago Delivery
               </Link>
             </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-gray-900">
-                Início
-              </Link>
-              <Link href="/lojas" className="text-blue-600 font-semibold">
-                Lojas
-              </Link>
-              <Link
-                href="/carrinho"
-                className="text-gray-700 hover:text-gray-900"
-              >
-                🛒 Carrinho
-              </Link>
-            </nav>
             <div className="flex items-center space-x-4">
               {session ? (
                 <>
@@ -185,12 +162,6 @@ function LojasContent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Location Info */}
         <div className="mb-8">
-          <Link
-            href="/"
-            className="text-blue-600 hover:text-blue-700 mb-4 inline-block"
-          >
-            ← Voltar para página inicial
-          </Link>
           <div className="bg-white rounded-xl shadow-md p-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Lojas em {cidade}
@@ -280,10 +251,10 @@ function LojasContent() {
                   </div>
 
                   <Link
-                    href={`/products?storeId=${store.id}`}
+                    href={`/lojas/${store.slug}`}
                     className="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center px-4 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
                   >
-                    Ver Produtos
+                    Ver Loja
                   </Link>
                 </div>
               </div>

@@ -12,6 +12,7 @@ export default function StoreForm({
   submitButtonText = "Cadastrar Loja",
 }) {
   const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [cnpj, setCnpj] = useState("");
@@ -27,6 +28,8 @@ export default function StoreForm({
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zipCodeLoading, setZipCodeLoading] = useState(false);
+  const [slugChecking, setSlugChecking] = useState(false);
+  const [slugAvailable, setSlugAvailable] = useState(null);
 
   // Mapeamento de UF para código de estado
   const ufToStateCode = {
@@ -63,6 +66,7 @@ export default function StoreForm({
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || "");
+      setSlug(initialData.slug || "");
       setDescription(initialData.description || "");
       setCategory(initialData.category || "");
       setCnpj(initialData.cnpj || "");
@@ -120,6 +124,7 @@ export default function StoreForm({
     e.preventDefault();
     onSubmit({
       name,
+      slug,
       description,
       category,
       cnpj,
@@ -139,6 +144,31 @@ export default function StoreForm({
     });
   };
 
+  const checkSlugAvailability = async () => {
+    if (!slug.trim()) return;
+
+    setSlugChecking(true);
+    try {
+      const response = await fetch(
+        `/api/stores/check-slug?slug=${encodeURIComponent(slug)}`
+      );
+      const data = await response.json();
+      setSlugAvailable(data.available);
+    } catch (error) {
+      console.error("Erro ao verificar slug:", error);
+      setSlugAvailable(false);
+    } finally {
+      setSlugChecking(false);
+    }
+  };
+
+  const handleSlugChange = (value) => {
+    // Permitir apenas letras minúsculas e números
+    const cleanValue = value.toLowerCase().replace(/[^a-z0-9]/g, "");
+    setSlug(cleanValue);
+    setSlugAvailable(null); // Reset availability check when slug changes
+  };
+
   const formContent = (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
@@ -155,6 +185,55 @@ export default function StoreForm({
             placeholder="Digite o nome da sua loja"
             required
           />
+        </div>
+
+        {/* Slug da Loja */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Identificação Única da Loja *
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={slug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              disabled={!!initialData} // Desabilitar se estiver editando
+              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                !!initialData
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed" // Estilo desabilitado
+                  : slugAvailable === true
+                  ? "border-green-500"
+                  : slugAvailable === false
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              placeholder="exemplo-loja123"
+              required
+            />
+            <button
+              type="button"
+              onClick={checkSlugAvailability}
+              disabled={!slug.trim() || slugChecking || !!initialData} // Desabilitar se estiver editando
+              className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {slugChecking ? "Verificando..." : "Verificar"}
+            </button>
+          </div>
+          {slugAvailable === true && !initialData && (
+            <p className="text-green-600 text-sm mt-1">
+              ✓ Identificação disponível
+            </p>
+          )}
+          {slugAvailable === false && !initialData && (
+            <p className="text-red-600 text-sm mt-1">
+              ✗ Identificação já em uso
+            </p>
+          )}
+          <p className="text-gray-500 text-xs mt-1">
+            {initialData
+              ? "A identificação única não pode ser alterada após a criação da loja."
+              : "Use apenas letras minúsculas e números. Esta identificação será usada na URL da sua loja."}
+          </p>
         </div>
 
         {/* Descrição */}

@@ -170,7 +170,7 @@ function ProductsPageContent() {
               >
                 Painel
               </Link>
-              <Link href="/products" className="text-blue-600 font-semibold">
+              <Link href="/produtos" className="text-blue-600 font-semibold">
                 Produtos
               </Link>
               <Link
