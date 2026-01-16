@@ -18,6 +18,47 @@ export default function LojaPage() {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [addingToCart, setAddingToCart] = useState(null);
 
+  // Mapeamento de códigos numéricos para siglas de UF
+  const stateCodeToUF = {
+    11: "RO",
+    12: "AC",
+    13: "AM",
+    14: "RR",
+    15: "PA",
+    16: "AP",
+    17: "TO",
+    21: "MA",
+    22: "PI",
+    23: "CE",
+    24: "RN",
+    25: "PB",
+    26: "PE",
+    27: "AL",
+    28: "SE",
+    29: "BA",
+    31: "MG",
+    32: "ES",
+    33: "RJ",
+    35: "SP",
+    41: "PR",
+    42: "SC",
+    43: "RS",
+    50: "MS",
+    51: "MT",
+    52: "GO",
+    53: "DF",
+  };
+
+  const getStateDisplay = (state) => {
+    if (!state) return "";
+    // Se já é uma sigla (2 letras), retorna em maiúsculas
+    if (state.length === 2 && isNaN(state)) {
+      return state.toUpperCase();
+    }
+    // Se é código numérico, converte para sigla
+    return stateCodeToUF[state] || state;
+  };
+
   // Carregar dados da loja
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -201,7 +242,7 @@ export default function LojaPage() {
                 </span>
                 <span className="mx-2">•</span>
                 <span>
-                  {store.city}, {store.state}
+                  {store.city}, {getStateDisplay(store.state)}
                 </span>
                 {store.minimumOrder && (
                   <>
@@ -222,6 +263,32 @@ export default function LojaPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Botão Minhas Compras / Meus Pedidos */}
+              {session && (
+                <Link
+                  href={
+                    store.isOwner
+                      ? `/lojas/${slug}/meus-pedidos`
+                      : `/lojas/${slug}/minhas-compras`
+                  }
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center"
+                >
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  {store.isOwner ? "Meus Pedidos" : "Minhas Compras"}
+                </Link>
+              )}
               <Link
                 href={`/lojas/${slug}/carrinho`}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center"
@@ -319,7 +386,9 @@ export default function LojaPage() {
                     </span>
                     <button
                       onClick={() => addToCart(product)}
-                      disabled={addingToCart === product.id || !product.available}
+                      disabled={
+                        addingToCart === product.id || !product.available
+                      }
                       className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {addingToCart === product.id ? (

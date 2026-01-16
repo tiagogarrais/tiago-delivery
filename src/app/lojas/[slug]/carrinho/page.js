@@ -17,6 +17,7 @@ export default function CarrinhoLojaPage() {
   const [updating, setUpdating] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errors, setErrors] = useState([]);
+  const [creatingOrder, setCreatingOrder] = useState(false);
 
   // Mapeamento de códigos numéricos para siglas de UF
   const stateCodeToUF = {
@@ -210,6 +211,69 @@ export default function CarrinhoLojaPage() {
     return cart.items.reduce((total, item) => {
       return total + parseFloat(item.product.price) * item.quantity;
     }, 0);
+  };
+
+  const handleFinalizarPedido = async () => {
+    if (creatingOrder) return;
+
+    try {
+      setCreatingOrder(true);
+      setErrors([]);
+
+      // Verificar se há sessão
+      if (!session) {
+        router.push(
+          `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+        );
+        return;
+      }
+
+      // Preparar dados do pedido
+      const orderItems = cart.items.map((item) => ({
+        productId: item.product.id,
+        productName: item.product.name,
+        price: parseFloat(item.product.price),
+        quantity: item.quantity,
+      }));
+
+      const subtotal = calculateTotal();
+      const deliveryFee = store.deliveryFee ? parseFloat(store.deliveryFee) : 0;
+      const total = subtotal + deliveryFee;
+
+      const orderData = {
+        storeId: store.id,
+        items: orderItems,
+        subtotal,
+        deliveryFee,
+        total,
+        customerName: session?.user?.name,
+        customerPhone: null,
+      };
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao criar pedido");
+      }
+
+      const data = await response.json();
+
+      // Redirecionar para checkout com o ID do pedido
+      router.push(`/lojas/${slug}/checkout?orderId=${data.order.id}`);
+    } catch (error) {
+      console.error("Erro ao criar pedido:", error);
+      setErrors([error.message]);
+      setTimeout(() => setErrors([]), 5000);
+    } finally {
+      setCreatingOrder(false);
+    }
   };
 
   if (loading) {
@@ -527,7 +591,9 @@ export default function CarrinhoLojaPage() {
                         R${" "}
                         {(
                           calculateTotal() +
-                          (store.deliveryFee ? parseFloat(store.deliveryFee) : 0)
+                          (store.deliveryFee
+                            ? parseFloat(store.deliveryFee)
+                            : 0)
                         ).toFixed(2)}
                       </span>
                     </div>
@@ -550,16 +616,22 @@ export default function CarrinhoLojaPage() {
                 </div>
 
                 <button
+                  onClick={handleFinalizarPedido}
                   disabled={
-                    store.minimumOrder &&
-                    calculateTotal() < parseFloat(store.minimumOrder)
+                    creatingOrder ||
+                    (store.minimumOrder &&
+                      calculateTotal() < parseFloat(store.minimumOrder))
                   }
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() =>
-                    alert("Funcionalidade de checkout em desenvolvimento")
-                  }
+                  className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Finalizar Pedido
+                  {creatingOrder ? (
+                    <span className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Criando pedido...
+                    </span>
+                  ) : (
+                    "Finalizar Pedido"
+                  )}
                 </button>
 
                 <Link

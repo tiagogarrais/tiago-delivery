@@ -21,6 +21,7 @@ model User {
   profile   Usuario?
   stores    Store[]
   carts     Cart[]
+  orders    Order[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -194,4 +195,32 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@unique([cartId, productId])
+}
+
+model Order {
+  id           String   @id @default(cuid())
+  userId       String
+  storeId      String
+  items        Json     // Array de { productId, productName, price, quantity }
+  subtotal     Float
+  deliveryFee  Float    @default(0)
+  total        Float
+  status       String   @default("pending") // pending, confirmed, preparing, delivering, completed, cancelled
+  
+  // Informações do cliente
+  customerName  String?
+  customerPhone String?
+  
+  // Informações da loja no momento do pedido
+  storeName     String
+  storePhone    String
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([storeId])
+  @@index([status])
 }
