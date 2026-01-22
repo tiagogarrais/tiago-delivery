@@ -31,6 +31,9 @@ export async function GET(request) {
                   },
                 },
               },
+              orderBy: {
+                createdAt: "asc",
+              },
             },
             store: true,
           },
@@ -48,6 +51,9 @@ export async function GET(request) {
                 },
               },
             },
+            orderBy: {
+              createdAt: "asc",
+            },
           },
           store: true,
         },
@@ -59,7 +65,7 @@ export async function GET(request) {
     console.error("Erro ao buscar carrinho:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -77,7 +83,7 @@ export async function POST(request) {
     if (!productId) {
       return NextResponse.json(
         { error: "ID do produto é obrigatório" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -90,14 +96,14 @@ export async function POST(request) {
     if (!product) {
       return NextResponse.json(
         { error: "Produto não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (!product.available) {
       return NextResponse.json(
         { error: "Produto indisponível" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -133,7 +139,7 @@ export async function POST(request) {
           error:
             "Você já tem produtos de outra loja no carrinho. Finalize ou limpe o carrinho antes de adicionar produtos de uma loja diferente.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -188,6 +194,9 @@ export async function POST(request) {
               },
             },
           },
+          orderBy: {
+            createdAt: "asc",
+          },
         },
         store: true,
       },
@@ -208,7 +217,7 @@ export async function POST(request) {
     console.error("Erro ao adicionar ao carrinho:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -243,7 +252,7 @@ export async function DELETE(request) {
     console.error("Erro ao limpar carrinho:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

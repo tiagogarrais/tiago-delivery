@@ -79,7 +79,7 @@ export default function EditProfilePage() {
     if (res.ok) {
       setSuccessMessage("Perfil salvo com sucesso!");
       setTimeout(() => {
-        router.push("/profile");
+        router.push("/painel?tab=personal");
       }, 2000);
     } else {
       try {
@@ -119,14 +119,17 @@ export default function EditProfilePage() {
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 Início
               </Link>
-              <Link href="/profile" className="text-blue-600 font-semibold">
+              <Link
+                href="/painel?tab=personal"
+                className="text-blue-600 font-semibold"
+              >
                 Painel
               </Link>
             </nav>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Olá, {session?.user?.name}</span>
               <Link
-                href="/profile"
+                href="/painel?tab=personal"
                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
               >
                 Voltar
@@ -356,7 +359,7 @@ export default function EditProfilePage() {
                 {loading ? "Salvando..." : "Salvar Alterações"}
               </button>
               <Link
-                href="/profile"
+                href="/painel?tab=personal"
                 className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-all inline-block"
               >
                 Cancelar

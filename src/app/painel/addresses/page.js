@@ -87,7 +87,7 @@ function AddressFormContent() {
   };
 
   const handleCancel = () => {
-    router.push("/profile?tab=addresses");
+    router.push("/painel?tab=addresses");
   };
 
   if (status === "loading") {

@@ -93,6 +93,7 @@ export async function POST(request) {
       email,
       minimumOrder,
       deliveryFee,
+      freeShippingThreshold,
       address,
     } = body;
 
@@ -194,6 +195,7 @@ export async function POST(request) {
         email: email.trim(),
         minimumOrder: minimumOrder || null,
         deliveryFee: deliveryFee || null,
+        freeShippingThreshold: freeShippingThreshold || null,
         street: address.street.trim(),
         number: address.number.trim(),
         complement: address.complement?.trim() || null,
@@ -254,6 +256,9 @@ export async function PUT(request) {
       cnpj,
       phone,
       email,
+      minimumOrder,
+      deliveryFee,
+      freeShippingThreshold,
       address,
     } = body;
 
@@ -362,6 +367,9 @@ export async function PUT(request) {
         cnpj: cnpj.trim(),
         phone: phone.trim(),
         email: email.trim(),
+        minimumOrder: minimumOrder || null,
+        deliveryFee: deliveryFee || null,
+        freeShippingThreshold: freeShippingThreshold || null,
         street: address.street.trim(),
         number: address.number.trim(),
         complement: address.complement?.trim() || null,

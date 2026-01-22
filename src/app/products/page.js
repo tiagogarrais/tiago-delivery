@@ -90,8 +90,8 @@ function ProductsPageContent() {
     if (!session) {
       router.push(
         `/login?callbackUrl=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`
+          window.location.pathname + window.location.search,
+        )}`,
       );
       return;
     }
@@ -174,7 +174,9 @@ function ProductsPageContent() {
                 Produtos
               </Link>
               <Link
-                href="/carrinho"
+                href={
+                  store?.slug ? `/lojas/${store.slug}/carrinho` : "/carrinho"
+                }
                 className="text-gray-700 hover:text-gray-900"
               >
                 🛒 Carrinho
@@ -183,7 +185,7 @@ function ProductsPageContent() {
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Olá, {session?.user?.name}</span>
               <Link
-                href="/profile?tab=stores"
+                href="/painel?tab=stores"
                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
               >
                 Voltar
@@ -335,7 +337,7 @@ function ProductsPageContent() {
                         <button
                           onClick={() =>
                             router.push(
-                              `/products/edit?id=${product.id}&storeId=${storeId}`
+                              `/products/edit?id=${product.id}&storeId=${storeId}`,
                             )
                           }
                           className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"

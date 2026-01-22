@@ -7,7 +7,6 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
 ### Para Empresas/Usuários
 
 - **Autenticação**
-
   - Página de login independente (`/login`)
   - Login com Google OAuth
   - Magic Link via email
@@ -15,7 +14,6 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
   - Proteção de rotas que requerem autenticação
 
 - **Gestão de Lojas**
-
   - Cadastro de múltiplas lojas por usuário
   - Edição completa de informações (nome, CNPJ, telefone, descrição)
   - Integração com ViaCEP para preenchimento automático de endereços brasileiros
@@ -23,7 +21,6 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
   - Sistema de exclusão com confirmação
 
 - **Gestão de Produtos**
-
   - Cadastro de produtos por loja
   - Edição de nome, descrição, preço e imagem
   - Controle de disponibilidade (ativar/desativar produtos)
@@ -31,7 +28,6 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
   - Sistema de exclusão com confirmação
 
 - **Perfil de Usuário**
-
   - Atualização de dados pessoais (nome, CPF, telefone)
   - Gerenciamento de múltiplos endereços
   - Dashboard com abas para lojas e dados pessoais
@@ -84,7 +80,6 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
    ```
 
 3. **Configure as variáveis de ambiente**
-
    - Copie o arquivo `.env.example` para `.env.local`
    - Preencha as variáveis necessárias:
 
@@ -184,8 +179,11 @@ src/
 │   │       └── [id]/      # Operações por produto (PUT, DELETE)
 │   ├── login/             # Página de login independente
 │   ├── painel/            # Painel do usuário
-│   ├── carrinho/          # Página do carrinho
 │   ├── lojas/             # Listagem de lojas
+│   │   └── [slug]/        # Página da loja
+│   │       ├── carrinho/  # Carrinho específico da loja
+│   │       ├── checkout/  # Checkout da loja
+│   │       └── meus-pedidos/ # Pedidos da loja
 │   ├── produtos/          # Listagem de produtos
 │   ├── store/             # Página de cadastro/edição de lojas
 │   ├── products/          # Gestão de produtos
@@ -268,11 +266,16 @@ public/
 
 ### Carrinho de Compras
 
-- ✅ Adicionar produtos ao carrinho
-- ✅ Atualizar quantidade de itens
+Cada loja possui seu próprio carrinho independente:
+
+- ✅ Carrinho específico por loja (`/lojas/[slug]/carrinho`)
+- ✅ Adicionar produtos ao carrinho da loja atual
+- ✅ Atualizar quantidade de itens (botões + e - ou digitação direta com confirmação)
 - ✅ Remover itens do carrinho
 - ✅ Limpar carrinho completo
 - ✅ Cálculo automático de subtotais e total
+- ✅ Frete grátis baseado no valor mínimo da loja
+- ✅ Notificações toast não intrusivas (sem mover layout)
 - ✅ Proteção: redireciona para login se não autenticado
 
 ## Modelo de Dados

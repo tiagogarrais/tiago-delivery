@@ -18,6 +18,10 @@ export default function CarrinhoLojaPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errors, setErrors] = useState([]);
   const [creatingOrder, setCreatingOrder] = useState(false);
+  const [editingQuantity, setEditingQuantity] = useState(null); // { itemId, value }
+  const [paymentMethod, setPaymentMethod] = useState("pix"); // pix, credit, debit, cash
+  const [changeAmount, setChangeAmount] = useState("");
+  const [needsChange, setNeedsChange] = useState(false); // Controla se precisa de troco
 
   // Mapeamento de códigos numéricos para siglas de UF
   const stateCodeToUF = {
@@ -64,7 +68,7 @@ export default function CarrinhoLojaPage() {
 
       try {
         const storeResponse = await fetch(
-          `/api/stores?slug=${encodeURIComponent(slug)}`
+          `/api/stores?slug=${encodeURIComponent(slug)}`,
         );
         if (!storeResponse.ok) {
           throw new Error("Loja não encontrada");
@@ -206,11 +210,42 @@ export default function CarrinhoLojaPage() {
     }
   };
 
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     if (!cart?.items) return 0;
     return cart.items.reduce((total, item) => {
       return total + parseFloat(item.product.price) * item.quantity;
     }, 0);
+  };
+
+  const calculateDeliveryFee = () => {
+    if (!store?.deliveryFee) {
+      return 0;
+    }
+
+    const subtotal = calculateSubtotal();
+    const threshold = parseFloat(store.freeShippingThreshold) || 0;
+
+    // Verificar se frete é grátis - threshold deve ser um número válido > 0
+    if (threshold > 0 && subtotal >= threshold) {
+      return 0;
+    }
+
+    return parseFloat(store.deliveryFee);
+  };
+
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateDeliveryFee();
+  };
+
+  const calculateAmountForFreeShipping = () => {
+    if (!store?.freeShippingThreshold) return 0;
+
+    const subtotal = calculateSubtotal();
+    const threshold = parseFloat(store.freeShippingThreshold);
+
+    if (subtotal >= threshold) return 0;
+
+    return threshold - subtotal;
   };
 
   const handleFinalizarPedido = async () => {
@@ -223,7 +258,7 @@ export default function CarrinhoLojaPage() {
       // Verificar se há sessão
       if (!session) {
         router.push(
-          `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+          `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
         );
         return;
       }
@@ -236,9 +271,9 @@ export default function CarrinhoLojaPage() {
         quantity: item.quantity,
       }));
 
-      const subtotal = calculateTotal();
-      const deliveryFee = store.deliveryFee ? parseFloat(store.deliveryFee) : 0;
-      const total = subtotal + deliveryFee;
+      const subtotal = calculateSubtotal();
+      const deliveryFee = calculateDeliveryFee();
+      const total = calculateTotal();
 
       const orderData = {
         storeId: store.id,
@@ -248,6 +283,9 @@ export default function CarrinhoLojaPage() {
         total,
         customerName: session?.user?.name,
         customerPhone: null,
+        paymentMethod,
+        needsChange,
+        changeAmount: needsChange ? parseFloat(changeAmount) : null,
       };
 
       const response = await fetch("/api/orders", {
@@ -363,12 +401,49 @@ export default function CarrinhoLojaPage() {
           </p>
         </div>
 
-        {/* Success Message */}
+        {/* Toast Notification */}
         {successMessage && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-sm font-medium text-green-800">
-              {successMessage}
-            </p>
+          <div className="fixed top-4 right-4 z-50 transition-all duration-300 ease-in-out">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg max-w-sm">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-green-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-green-800">
+                    {successMessage}
+                  </p>
+                </div>
+                <div className="ml-auto pl-3">
+                  <button
+                    onClick={() => setSuccessMessage("")}
+                    className="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -443,6 +518,18 @@ export default function CarrinhoLojaPage() {
                         </span>
                       </div>
                     )}
+                  {store.freeShippingThreshold &&
+                    parseFloat(store.freeShippingThreshold) > 0 && (
+                      <div>
+                        <span className="font-medium">
+                          Frete grátis acima de:
+                        </span>{" "}
+                        <span className="text-blue-600 font-semibold">
+                          R${" "}
+                          {parseFloat(store.freeShippingThreshold).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
                 </div>
               </div>
 
@@ -514,9 +601,53 @@ export default function CarrinhoLojaPage() {
                           >
                             -
                           </button>
-                          <span className="text-lg font-semibold text-gray-900 w-8 text-center">
-                            {item.quantity}
-                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            value={
+                              editingQuantity &&
+                              editingQuantity.itemId === item.id
+                                ? editingQuantity.value
+                                : item.quantity
+                            }
+                            onFocus={(e) => {
+                              setEditingQuantity({
+                                itemId: item.id,
+                                value: item.quantity.toString(),
+                              });
+                            }}
+                            onChange={(e) => {
+                              setEditingQuantity({
+                                itemId: item.id,
+                                value: e.target.value,
+                              });
+                            }}
+                            onBlur={(e) => {
+                              if (
+                                editingQuantity &&
+                                editingQuantity.itemId === item.id
+                              ) {
+                                const newQuantity =
+                                  parseInt(editingQuantity.value) || 1;
+                                if (
+                                  newQuantity >= 1 &&
+                                  newQuantity !== item.quantity
+                                ) {
+                                  updateQuantity(item.id, newQuantity);
+                                }
+                              }
+                              setEditingQuantity(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.target.blur(); // Trigger onBlur
+                              } else if (e.key === "Escape") {
+                                setEditingQuantity(null);
+                              }
+                            }}
+                            disabled={updating}
+                            className="w-16 h-8 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                          />
                           <button
                             onClick={() =>
                               updateQuantity(item.id, item.quantity + 1)
@@ -569,18 +700,34 @@ export default function CarrinhoLojaPage() {
                       Subtotal ({cart.items.length}{" "}
                       {cart.items.length === 1 ? "item" : "itens"})
                     </span>
-                    <span>R$ {calculateTotal().toFixed(2)}</span>
+                    <span>R$ {calculateSubtotal().toFixed(2)}</span>
                   </div>
 
-                  {store.deliveryFee !== null &&
-                    store.deliveryFee !== undefined && (
-                      <div className="flex justify-between text-gray-600">
-                        <span>Taxa de entrega</span>
-                        <span>
-                          {store.deliveryFee === 0
-                            ? "Grátis"
-                            : `R$ ${parseFloat(store.deliveryFee).toFixed(2)}`}
-                        </span>
+                  {calculateDeliveryFee() > 0 && (
+                    <div className="flex justify-between text-gray-600">
+                      <span>Taxa de Entrega</span>
+                      <span>R$ {calculateDeliveryFee().toFixed(2)}</span>
+                    </div>
+                  )}
+                  {calculateDeliveryFee() === 0 &&
+                    store?.freeShippingThreshold &&
+                    parseFloat(store.freeShippingThreshold) > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Frete Grátis</span>
+                        <span>Grátis</span>
+                      </div>
+                    )}
+
+                  {calculateDeliveryFee() > 0 &&
+                    store?.freeShippingThreshold &&
+                    parseFloat(store.freeShippingThreshold) > 0 &&
+                    calculateAmountForFreeShipping() > 0 && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-sm text-blue-800">
+                          🚚 Adicione R${" "}
+                          {calculateAmountForFreeShipping().toFixed(2)} para
+                          frete grátis!
+                        </p>
                       </div>
                     )}
 
@@ -588,19 +735,13 @@ export default function CarrinhoLojaPage() {
                     <div className="flex justify-between text-lg font-bold text-gray-900">
                       <span>Total</span>
                       <span className="text-green-600">
-                        R${" "}
-                        {(
-                          calculateTotal() +
-                          (store.deliveryFee
-                            ? parseFloat(store.deliveryFee)
-                            : 0)
-                        ).toFixed(2)}
+                        R$ {calculateTotal().toFixed(2)}
                       </span>
                     </div>
                   </div>
 
                   {store.minimumOrder &&
-                    calculateTotal() < parseFloat(store.minimumOrder) && (
+                    calculateSubtotal() < parseFloat(store.minimumOrder) && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
                         <p className="text-sm text-yellow-800">
                           ⚠️ Valor mínimo de pedido: R${" "}
@@ -608,11 +749,170 @@ export default function CarrinhoLojaPage() {
                           <br />
                           Faltam: R${" "}
                           {(
-                            parseFloat(store.minimumOrder) - calculateTotal()
+                            parseFloat(store.minimumOrder) - calculateSubtotal()
                           ).toFixed(2)}
                         </p>
                       </div>
                     )}
+                </div>
+
+                {/* Payment Options */}
+                <div className="border-t pt-4">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Forma de Pagamento
+                  </h4>
+
+                  <div className="space-y-3">
+                    {/* PIX */}
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="pix"
+                        checked={paymentMethod === "pix"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-3 text-sm font-medium text-gray-700">
+                        📱 PIX
+                      </span>
+                      <span className="ml-2 text-xs text-gray-500">
+                        (Pagamento instantâneo)
+                      </span>
+                    </label>
+
+                    {/* Credit Card */}
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="credit"
+                        checked={paymentMethod === "credit"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-3 text-sm font-medium text-gray-700">
+                        💳 Cartão de Crédito
+                      </span>
+                      <span className="ml-2 text-xs text-gray-500">
+                        (Entregador leva a maquininha)
+                      </span>
+                    </label>
+
+                    {/* Debit Card */}
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="debit"
+                        checked={paymentMethod === "debit"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-3 text-sm font-medium text-gray-700">
+                        💳 Cartão de Débito
+                      </span>
+                      <span className="ml-2 text-xs text-gray-500">
+                        (Entregador leva a maquininha)
+                      </span>
+                    </label>
+
+                    {/* Cash */}
+                    <label className="flex items-start">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="cash"
+                        checked={paymentMethod === "cash"}
+                        onChange={(e) => {
+                          setPaymentMethod(e.target.value);
+                          setNeedsChange(false); // Reset quando muda para dinheiro
+                          setChangeAmount(""); // Limpar valor
+                        }}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 mt-0.5"
+                      />
+                      <div className="ml-3 flex-1">
+                        <span className="text-sm font-medium text-gray-700">
+                          💵 Dinheiro
+                        </span>
+                        <span className="ml-2 text-xs text-gray-500">
+                          (Entregador leva o troco)
+                        </span>
+                        {paymentMethod === "cash" && (
+                          <div className="mt-2">
+                            <div className="mb-2">
+                              <label className="block text-xs text-gray-600 mb-2">
+                                Precisa de troco?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="needsChange"
+                                    checked={!needsChange}
+                                    onChange={() => {
+                                      setNeedsChange(false);
+                                      setChangeAmount("");
+                                    }}
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                  />
+                                  <span className="ml-2 text-sm text-gray-700">
+                                    Não
+                                  </span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="needsChange"
+                                    checked={needsChange}
+                                    onChange={() => setNeedsChange(true)}
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                  />
+                                  <span className="ml-2 text-sm text-gray-700">
+                                    Sim
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+                            {needsChange && (
+                              <div>
+                                <label className="block text-xs text-gray-600 mb-1">
+                                  Trazer troco para:
+                                </label>
+                                <div className="relative">
+                                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                                    R$
+                                  </span>
+                                  <input
+                                    type="number"
+                                    min={calculateTotal().toFixed(2)}
+                                    step="0.01"
+                                    value={changeAmount}
+                                    onChange={(e) =>
+                                      setChangeAmount(e.target.value)
+                                    }
+                                    placeholder={`Mínimo ${calculateTotal().toFixed(2)}`}
+                                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                  />
+                                </div>
+                                {changeAmount &&
+                                  parseFloat(changeAmount) >
+                                    calculateTotal() && (
+                                    <p className="mt-1 text-xs text-green-600 font-medium">
+                                      💰 O seu troco é de R${" "}
+                                      {(
+                                        parseFloat(changeAmount) -
+                                        calculateTotal()
+                                      ).toFixed(2)}
+                                    </p>
+                                  )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  </div>
                 </div>
 
                 <button
@@ -620,7 +920,7 @@ export default function CarrinhoLojaPage() {
                   disabled={
                     creatingOrder ||
                     (store.minimumOrder &&
-                      calculateTotal() < parseFloat(store.minimumOrder))
+                      calculateSubtotal() < parseFloat(store.minimumOrder))
                   }
                   className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

@@ -35,7 +35,7 @@ export async function GET(request) {
       if (!order) {
         return NextResponse.json(
           { error: "Pedido não encontrado" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -49,7 +49,7 @@ export async function GET(request) {
         if (!store || store.userId !== session.user.id) {
           return NextResponse.json(
             { error: "Você não tem permissão para ver este pedido" },
-            { status: 403 }
+            { status: 403 },
           );
         }
       }
@@ -68,7 +68,7 @@ export async function GET(request) {
       if (!store || store.userId !== session.user.id) {
         return NextResponse.json(
           { error: "Você não tem permissão para ver estes pedidos" },
-          { status: 403 }
+          { status: 403 },
         );
       }
 
@@ -97,7 +97,7 @@ export async function GET(request) {
     console.error("Erro ao buscar pedidos:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -138,6 +138,9 @@ export async function POST(request) {
       total,
       customerName,
       customerPhone,
+      paymentMethod,
+      needsChange,
+      changeAmount,
     } = body;
 
     const errors = [];
@@ -171,7 +174,7 @@ export async function POST(request) {
       console.log("Loja não encontrada");
       return NextResponse.json(
         { error: "Loja não encontrada" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -192,6 +195,9 @@ export async function POST(request) {
         customerPhone: customerPhone || null,
         storeName: store.name,
         storePhone: store.phone,
+        paymentMethod,
+        needsChange: needsChange || false,
+        changeAmount: needsChange ? changeAmount : null,
       },
     });
 
@@ -219,7 +225,7 @@ export async function POST(request) {
     console.error("Stack:", error.stack);
     return NextResponse.json(
       { error: "Erro interno do servidor: " + error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

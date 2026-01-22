@@ -74,6 +74,7 @@ function StorePageContent() {
               email: store.email,
               minimumOrder: store.minimumOrder || "",
               deliveryFee: store.deliveryFee || "",
+              freeShippingThreshold: store.freeShippingThreshold || "",
               address: {
                 zipCode: store.zipCode,
                 street: store.street,

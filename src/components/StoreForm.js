@@ -20,6 +20,7 @@ export default function StoreForm({
   const [email, setEmail] = useState("");
   const [minimumOrder, setMinimumOrder] = useState("");
   const [deliveryFee, setDeliveryFee] = useState("");
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
@@ -74,6 +75,7 @@ export default function StoreForm({
       setEmail(initialData.email || "");
       setMinimumOrder(initialData.minimumOrder || "");
       setDeliveryFee(initialData.deliveryFee || "");
+      setFreeShippingThreshold(initialData.freeShippingThreshold || "");
       setZipCode(initialData.address?.zipCode || "");
       setStreet(initialData.address?.street || "");
       setNumber(initialData.address?.number || "");
@@ -132,6 +134,9 @@ export default function StoreForm({
       email,
       minimumOrder: minimumOrder ? parseFloat(minimumOrder) : null,
       deliveryFee: deliveryFee ? parseFloat(deliveryFee) : null,
+      freeShippingThreshold: freeShippingThreshold
+        ? parseFloat(freeShippingThreshold)
+        : null,
       address: {
         zipCode,
         street,
@@ -344,6 +349,22 @@ export default function StoreForm({
             min="0"
             value={deliveryFee}
             onChange={(e) => setDeliveryFee(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="0.00"
+          />
+        </div>
+
+        {/* Valor Mínimo para Frete Grátis */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Valor Mínimo para Frete Grátis (R$)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={freeShippingThreshold}
+            onChange={(e) => setFreeShippingThreshold(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="0.00"
           />

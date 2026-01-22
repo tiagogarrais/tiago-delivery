@@ -18,7 +18,7 @@ export async function PUT(request, { params }) {
     if (!quantity || quantity < 1) {
       return NextResponse.json(
         { error: "Quantidade inválida" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function PUT(request, { params }) {
     if (!cartItem) {
       return NextResponse.json(
         { error: "Item não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -70,6 +70,9 @@ export async function PUT(request, { params }) {
               },
             },
           },
+          orderBy: {
+            createdAt: "asc",
+          },
         },
         store: true,
       },
@@ -80,7 +83,7 @@ export async function PUT(request, { params }) {
     console.error("Erro ao atualizar item:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -110,7 +113,7 @@ export async function DELETE(request, { params }) {
     if (!cartItem) {
       return NextResponse.json(
         { error: "Item não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -155,6 +158,9 @@ export async function DELETE(request, { params }) {
               },
             },
           },
+          orderBy: {
+            createdAt: "asc",
+          },
         },
         store: true,
       },
@@ -165,7 +171,7 @@ export async function DELETE(request, { params }) {
     console.error("Erro ao remover item:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

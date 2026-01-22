@@ -17,6 +17,7 @@ export default function LojaPage() {
   const [error, setError] = useState(null);
   const [cartItemCount, setCartItemCount] = useState(0);
   const [addingToCart, setAddingToCart] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Mapeamento de códigos numéricos para siglas de UF
   const stateCodeToUF = {
@@ -69,7 +70,7 @@ export default function LojaPage() {
 
         // Buscar loja pelo slug
         const storeResponse = await fetch(
-          `/api/stores?slug=${encodeURIComponent(slug)}`
+          `/api/stores?slug=${encodeURIComponent(slug)}`,
         );
         if (!storeResponse.ok) {
           throw new Error("Loja não encontrada");
@@ -86,7 +87,7 @@ export default function LojaPage() {
 
         // Buscar produtos da loja
         const productsResponse = await fetch(
-          `/api/products?storeId=${foundStore.id}`
+          `/api/products?storeId=${foundStore.id}`,
         );
         if (productsResponse.ok) {
           const productsData = await productsResponse.json();
@@ -115,7 +116,7 @@ export default function LojaPage() {
           if (data.cart && data.cart.storeId === store.id) {
             const count = data.cart.items.reduce(
               (total, item) => total + item.quantity,
-              0
+              0,
             );
             setCartItemCount(count);
           }
@@ -132,7 +133,7 @@ export default function LojaPage() {
     // Verificar se o usuário está logado
     if (!session) {
       router.push(
-        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
       );
       return;
     }
@@ -152,12 +153,13 @@ export default function LojaPage() {
         if (data.cart && data.cart.storeId === store.id) {
           const count = data.cart.items.reduce(
             (total, item) => total + item.quantity,
-            0
+            0,
           );
           setCartItemCount(count);
         }
-        // Redirecionar para o carrinho da loja
-        router.push(`/lojas/${slug}/carrinho`);
+        // Produto adicionado com sucesso - usuário permanece na loja
+        setSuccessMessage(`${product.name} adicionado ao carrinho!`);
+        setTimeout(() => setSuccessMessage(""), 3000);
       } else {
         const errorData = await response.json();
         alert(errorData.error || "Erro ao adicionar ao carrinho");
@@ -260,6 +262,15 @@ export default function LojaPage() {
                     </span>
                   </>
                 )}
+                {store.freeShippingThreshold && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <span className="text-green-600 font-medium">
+                      Frete grátis acima de{" "}
+                      {formatPrice(store.freeShippingThreshold)}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -312,6 +323,52 @@ export default function LojaPage() {
           </div>
         </div>
       </div>
+
+      {/* Success Toast */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 transition-all duration-300 ease-in-out">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg max-w-sm">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-green-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">
+                  {successMessage}
+                </p>
+              </div>
+              <div className="ml-auto pl-3">
+                <button
+                  onClick={() => setSuccessMessage("")}
+                  className="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Produtos */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

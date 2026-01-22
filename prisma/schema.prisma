@@ -126,6 +126,7 @@ model Store {
   // Configurações de pedido
   minimumOrder    Float? // Valor mínimo de compras
   deliveryFee     Float? // Taxa de entrega
+  freeShippingThreshold Float? // Valor mínimo para frete grátis
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
@@ -206,6 +207,11 @@ model Order {
   deliveryFee  Float    @default(0)
   total        Float
   status       String   @default("pending") // pending, confirmed, preparing, delivering, completed, cancelled
+  
+  // Informações de pagamento
+  paymentMethod String? // pix, credit, debit, cash
+  needsChange   Boolean? @default(false) // se precisa de troco (apenas para cash)
+  changeAmount  Float?   // valor para troco (apenas para cash)
   
   // Informações do cliente
   customerName  String?
