@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
+import Header from "../../components/Header";
 
 function LojasContent() {
   const { data: session, status } = useSession();
@@ -123,40 +124,7 @@ function LojasContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-gray-900">
-                Tiago Delivery
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              {session ? (
-                <>
-                  <span className="text-gray-700">
-                    Olá, {session.user?.name}
-                  </span>
-                  <Link
-                    href="/painel"
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Painel
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  href="/"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                >
-                  Entrar
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -198,17 +166,37 @@ function LojasContent() {
             {stores.map((store) => (
               <div
                 key={store.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden"
+                className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden ${
+                  !store.isOpen ? "opacity-75" : ""
+                }`}
               >
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {store.name}
-                  </h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {store.name}
+                    </h3>
+                    {!store.isOpen && (
+                      <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                        Fechada
+                      </span>
+                    )}
+                  </div>
 
                   {store.description && (
                     <p className="text-gray-600 mb-4 line-clamp-2">
                       {store.description}
                     </p>
+                  )}
+
+                  {!store.isOpen && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                      <div className="flex items-center">
+                        <span className="text-yellow-600 mr-2">⏰</span>
+                        <span className="text-yellow-800 text-sm font-medium">
+                          A loja está fechada neste momento.
+                        </span>
+                      </div>
+                    </div>
                   )}
 
                   <div className="space-y-2 text-sm text-gray-600 mb-4">
@@ -252,9 +240,13 @@ function LojasContent() {
 
                   <Link
                     href={`/lojas/${store.slug}`}
-                    className="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center px-4 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
+                    className={`block w-full text-center px-4 py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg ${
+                      store.isOpen
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                        : "bg-orange-500 text-white hover:bg-orange-600"
+                    }`}
                   >
-                    Ver Loja
+                    {store.isOpen ? "Ver Loja" : "Ver Produtos"}
                   </Link>
                 </div>
               </div>

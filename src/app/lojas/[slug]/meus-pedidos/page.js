@@ -45,8 +45,8 @@ export default function MeusPedidosPage() {
       // Atualizar lista de pedidos
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
+          order.id === orderId ? { ...order, status: newStatus } : order,
+        ),
       );
     } catch (err) {
       console.error("Erro ao atualizar pedido:", err);
@@ -54,6 +54,38 @@ export default function MeusPedidosPage() {
     } finally {
       setUpdatingOrder(null);
     }
+  };
+
+  const getAllOrderSteps = (currentStatus) => {
+    const steps = [
+      { label: "Receber Pedido", status: "confirmed", color: "blue" },
+      { label: "Confirmar Pagamento", status: "preparing", color: "purple" },
+      {
+        label: "Pedido em Rota de Entrega",
+        status: "delivering",
+        color: "indigo",
+      },
+      { label: "Pedido Finalizado", status: "completed", color: "green" },
+    ];
+
+    const statusOrder = {
+      pending: 0,
+      confirmed: 1,
+      preparing: 2,
+      delivering: 3,
+      completed: 4,
+      cancelled: -1,
+    };
+
+    const currentStepIndex = statusOrder[currentStatus] || 0;
+
+    return steps.map((step, index) => ({
+      ...step,
+      isCompleted: index < currentStepIndex,
+      isCurrent: index === currentStepIndex,
+      isAvailable: index === currentStepIndex,
+      stepNumber: index + 1,
+    }));
   };
 
   const getAvailableActions = (status) => {
@@ -65,7 +97,7 @@ export default function MeusPedidosPage() {
       case "confirmed":
         return [
           {
-            label: "Confirmar Pagamento",
+            label: "Confirmar forma de pagamento",
             status: "preparing",
             color: "purple",
           },
@@ -73,14 +105,18 @@ export default function MeusPedidosPage() {
       case "preparing":
         return [
           {
-            label: "Pedido em Rota de Entrega",
+            label: "Confirmar pedido em Rota de Entrega",
             status: "delivering",
             color: "indigo",
           },
         ];
       case "delivering":
         return [
-          { label: "Pedido Finalizado", status: "completed", color: "green" },
+          {
+            label: "Finalizar Pedido",
+            status: "completed",
+            color: "green",
+          },
         ];
       default:
         return [];
@@ -96,7 +132,7 @@ export default function MeusPedidosPage() {
 
         // Buscar loja
         const storeResponse = await fetch(
-          `/api/stores?slug=${encodeURIComponent(slug)}`
+          `/api/stores?slug=${encodeURIComponent(slug)}`,
         );
         if (!storeResponse.ok) {
           throw new Error("Loja não encontrada");
@@ -118,7 +154,7 @@ export default function MeusPedidosPage() {
 
         // Buscar pedidos da loja
         const ordersResponse = await fetch(
-          `/api/orders?storeId=${foundStore.id}&asStore=true`
+          `/api/orders?storeId=${foundStore.id}&asStore=true`,
         );
         if (!ordersResponse.ok) {
           throw new Error("Erro ao carregar pedidos");
@@ -255,7 +291,7 @@ export default function MeusPedidosPage() {
                   (o) =>
                     o.status === "confirmed" ||
                     o.status === "preparing" ||
-                    o.status === "delivering"
+                    o.status === "delivering",
                 ).length
               }
             </p>
@@ -310,11 +346,8 @@ export default function MeusPedidosPage() {
                               year: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
-                            }
+                            },
                           )}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          ID: {order.id.slice(0, 8)}...
                         </p>
                       </div>
                       <span
@@ -385,9 +418,76 @@ export default function MeusPedidosPage() {
                     </div>
                   )}
 
-                  {/* Action Buttons */}
-                  {availableActions.length > 0 && (
-                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                  {/* Order Status Steps */}
+                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">
+                        Status do Pedido
+                      </h4>
+                      <div className="flex flex-col space-y-4 relative">
+                        {getAllOrderSteps(order.status).map((step, index) => (
+                          <div
+                            key={step.status}
+                            className="flex items-start relative"
+                          >
+                            {/* Step Circle */}
+                            <div
+                              className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold flex-shrink-0 z-10 ${
+                                step.isCompleted
+                                  ? "bg-green-600 text-white"
+                                  : step.isCurrent
+                                    ? `bg-${step.color}-600 text-white`
+                                    : "bg-gray-300 text-gray-600"
+                              }`}
+                            >
+                              {step.isCompleted ? (
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              ) : (
+                                step.stepNumber
+                              )}
+                            </div>
+
+                            {/* Step Label */}
+                            <div className="ml-3 flex-1">
+                              <p
+                                className={`text-sm font-medium ${
+                                  step.isCompleted
+                                    ? "text-green-600"
+                                    : step.isCurrent
+                                      ? `text-${step.color}-600`
+                                      : "text-gray-500"
+                                }`}
+                              >
+                                {step.label}
+                              </p>
+                            </div>
+
+                            {/* Vertical Connector Line */}
+                            {index <
+                              getAllOrderSteps(order.status).length - 1 && (
+                              <div className="absolute left-4 top-8 w-0.5 h-8 bg-gray-300">
+                                {step.isCompleted && (
+                                  <div className="w-full h-full bg-green-600" />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    {availableActions && availableActions.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {availableActions.map((action) => (
                           <button
@@ -399,7 +499,13 @@ export default function MeusPedidosPage() {
                             className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                               isUpdating
                                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : `bg-${action.color}-600 text-white hover:bg-${action.color}-700`
+                                : action.color === "blue"
+                                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                                  : action.color === "purple"
+                                    ? "bg-purple-600 text-white hover:bg-purple-700"
+                                    : action.color === "indigo"
+                                      ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                      : "bg-green-600 text-white hover:bg-green-700"
                             }`}
                           >
                             {isUpdating ? (
@@ -431,8 +537,8 @@ export default function MeusPedidosPage() {
                           </button>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               );
             })}

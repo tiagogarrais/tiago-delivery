@@ -195,10 +195,7 @@ export default function CheckoutPage() {
     const message = encodeURIComponent(
       `Olá! Acabei de realizar o pagamento do meu pedido na ${
         store?.name
-      }.\n\nPedido: ${order?.id.slice(
-        0,
-        8,
-      )}...\nValor: R$ ${calculateTotal().toFixed(2)}\n\nSegue o comprovante:`,
+      }.\n\nValor: R$ ${calculateTotal().toFixed(2)}\n\nSegue o comprovante:`,
     );
     return `https://wa.me/${whatsappNumber}?text=${message}`;
   };
@@ -281,6 +278,16 @@ export default function CheckoutPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Link
+            href={`/lojas/${slug}`}
+            className="text-blue-600 hover:text-blue-700 text-sm"
+          >
+            ← Voltar para {store?.name}
+          </Link>
+        </div>
+
         {/* Error Messages */}
         {errors.length > 0 && (
           <div className="mb-6 bg-red-50 border-2 border-red-300 rounded-xl p-6">

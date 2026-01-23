@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { IMaskInput } from "react-imask";
 import AddressForm from "../../components/AddressForm";
+import Header from "../../components/Header";
 
 function ProfileContent() {
   const { data: session, status } = useSession();
@@ -107,7 +108,7 @@ function ProfileContent() {
 
   // Mapeamento reverso: código de estado para UF
   const stateCodeToUf = Object.fromEntries(
-    Object.entries(ufToStateCode).map(([uf, code]) => [code, uf])
+    Object.entries(ufToStateCode).map(([uf, code]) => [code, uf]),
   );
 
   // Buscar lista de países
@@ -265,7 +266,7 @@ function ProfileContent() {
   useEffect(() => {
     if (addressFormData.state) {
       const stateCities = cities.filter(
-        (city) => city.state_id.toString() === addressFormData.state
+        (city) => city.state_id.toString() === addressFormData.state,
       );
       setFilteredCities(stateCities);
     } else {
@@ -277,7 +278,7 @@ function ProfileContent() {
   useEffect(() => {
     if (storeFormData.address.state) {
       const stateCities = cities.filter(
-        (city) => city.state_id.toString() === storeFormData.address.state
+        (city) => city.state_id.toString() === storeFormData.address.state,
       );
       setStoreFilteredCities(stateCities);
     } else {
@@ -392,7 +393,7 @@ function ProfileContent() {
         setSuccessMessage(
           editingStore
             ? "Loja atualizada com sucesso!"
-            : "Loja cadastrada com sucesso!"
+            : "Loja cadastrada com sucesso!",
         );
         setShowStoreForm(false);
         setEditingStore(null);
@@ -455,7 +456,7 @@ function ProfileContent() {
   const handleDeleteAccount = async () => {
     if (
       !confirm(
-        "Tem certeza que deseja remover sua conta? Esta ação não pode ser desfeita."
+        "Tem certeza que deseja remover sua conta? Esta ação não pode ser desfeita.",
       )
     ) {
       return;
@@ -492,7 +493,7 @@ function ProfileContent() {
       setZipCodeLoading(true);
       try {
         const response = await fetch(
-          `https://viacep.com.br/ws/${cleanZipCode}/json/`
+          `https://viacep.com.br/ws/${cleanZipCode}/json/`,
         );
         const data = await response.json();
 
@@ -504,7 +505,7 @@ function ProfileContent() {
           const cityData = cities.find(
             (city) =>
               city.name.toLowerCase() === data.localidade.toLowerCase() &&
-              city.state_id.toString() === stateCode
+              city.state_id.toString() === stateCode,
           );
 
           // Preencher os campos automaticamente
@@ -540,7 +541,7 @@ function ProfileContent() {
       setStoreZipCodeLoading(true);
       try {
         const response = await fetch(
-          `https://viacep.com.br/ws/${cleanZipCode}/json/`
+          `https://viacep.com.br/ws/${cleanZipCode}/json/`,
         );
         const data = await response.json();
 
@@ -552,7 +553,7 @@ function ProfileContent() {
           const cityData = cities.find(
             (city) =>
               city.name.toLowerCase() === data.localidade.toLowerCase() &&
-              city.state_id.toString() === stateCode
+              city.state_id.toString() === stateCode,
           );
 
           // Preencher os campos automaticamente
@@ -593,35 +594,7 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-gray-900">
-                Tiago Delivery
-              </Link>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-gray-900">
-                Início
-              </Link>
-              <Link href="#profile" className="text-blue-600 font-semibold">
-                Painel
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Olá, {session.user?.name}</span>
-              <button
-                onClick={() => signOut()}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -734,7 +707,7 @@ function ProfileContent() {
                       <p className="text-lg text-gray-900">
                         {formData.birthDate
                           ? new Date(
-                              formData.birthDate + "T00:00:00"
+                              formData.birthDate + "T00:00:00",
                             ).toLocaleDateString("pt-BR")
                           : "Não informado"}
                       </p>

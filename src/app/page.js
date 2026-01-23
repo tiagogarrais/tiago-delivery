@@ -1,8 +1,9 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Header from "../components/Header";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -74,48 +75,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Tiago Delivery
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              {session ? (
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-700">
-                    Olá, {session.user?.name}
-                  </span>
-                  <Link
-                    href="/painel"
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Painel
-                  </Link>
-                  <button
-                    onClick={() => signOut()}
-                    className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                  >
-                    Sair
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <Link
-                    href="/login"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                  >
-                    Entrar
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white">

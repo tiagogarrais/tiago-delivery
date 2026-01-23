@@ -107,6 +107,16 @@ export async function POST(request) {
       );
     }
 
+    if (!product.store.isOpen) {
+      return NextResponse.json(
+        {
+          error:
+            "Esta loja está fechada no momento. Tente novamente mais tarde.",
+        },
+        { status: 400 },
+      );
+    }
+
     let userId = null;
     if (session?.user?.email) {
       const user = await prisma.user.findUnique({

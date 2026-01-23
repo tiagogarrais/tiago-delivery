@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import StoreForm from "../../components/StoreForm";
 import { IMaskInput } from "react-imask";
+import Header from "../../components/Header";
 
 function StorePageContent() {
   const { data: session, status } = useSession();
@@ -254,7 +255,7 @@ function StorePageContent() {
         setSuccessMessage(
           storeId
             ? "Loja atualizada com sucesso!"
-            : "Loja cadastrada com sucesso!"
+            : "Loja cadastrada com sucesso!",
         );
         setTimeout(() => {
           router.push("/painel?tab=stores");
@@ -367,7 +368,7 @@ function StorePageContent() {
         // Se a chave atualizada é principal, desmarcar as outras
         const updatedKeys = data.pixKey.isPrimary
           ? pixKeys.map((pk) =>
-              pk.id === id ? data.pixKey : { ...pk, isPrimary: false }
+              pk.id === id ? data.pixKey : { ...pk, isPrimary: false },
             )
           : pixKeys.map((pk) => (pk.id === id ? data.pixKey : pk));
         setPixKeys(updatedKeys);
@@ -451,7 +452,7 @@ function StorePageContent() {
   const handleDeleteStore = async () => {
     if (
       !confirm(
-        "Tem certeza que deseja excluir esta loja? Todos os produtos e chaves PIX associados também serão excluídos. Esta ação não pode ser desfeita."
+        "Tem certeza que deseja excluir esta loja? Todos os produtos e chaves PIX associados também serão excluídos. Esta ação não pode ser desfeita.",
       )
     ) {
       return;
@@ -492,41 +493,7 @@ function StorePageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-gray-900">
-                Tiago Delivery
-              </Link>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-gray-900">
-                Início
-              </Link>
-              <Link
-                href="/painel"
-                className="text-gray-700 hover:text-gray-900"
-              >
-                Perfil
-              </Link>
-              <Link href="/store" className="text-blue-600 font-semibold">
-                Cadastrar Loja
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Olá, {session?.user?.name}</span>
-              <Link
-                href="/painel"
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
-              >
-                Voltar
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -658,8 +625,8 @@ function StorePageContent() {
                       ? "Atualizando..."
                       : "Cadastrando..."
                     : storeId
-                    ? "Atualizar Loja"
-                    : "Cadastrar Loja"
+                      ? "Atualizar Loja"
+                      : "Cadastrar Loja"
                 }
               />
             </>
@@ -691,7 +658,7 @@ function StorePageContent() {
                       if (pixKey.type === "cpf" && pixKey.key.length === 11) {
                         displayKey = pixKey.key.replace(
                           /(\d{3})(\d{3})(\d{3})(\d{2})/,
-                          "$1.$2.$3-$4"
+                          "$1.$2.$3-$4",
                         );
                       } else if (
                         pixKey.type === "cnpj" &&
@@ -699,18 +666,18 @@ function StorePageContent() {
                       ) {
                         displayKey = pixKey.key.replace(
                           /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-                          "$1.$2.$3/$4-$5"
+                          "$1.$2.$3/$4-$5",
                         );
                       } else if (pixKey.type === "phone") {
                         if (pixKey.key.length === 11) {
                           displayKey = pixKey.key.replace(
                             /(\d{2})(\d{5})(\d{4})/,
-                            "($1) $2-$3"
+                            "($1) $2-$3",
                           );
                         } else if (pixKey.key.length === 10) {
                           displayKey = pixKey.key.replace(
                             /(\d{2})(\d{4})(\d{4})/,
-                            "($1) $2-$3"
+                            "($1) $2-$3",
                           );
                         }
                       }
@@ -726,8 +693,8 @@ function StorePageContent() {
                                 {pixKey.type === "phone"
                                   ? "TELEFONE"
                                   : pixKey.type === "random"
-                                  ? "CHAVE ALEATÓRIA"
-                                  : pixKey.type}
+                                    ? "CHAVE ALEATÓRIA"
+                                    : pixKey.type}
                               </span>
                               {pixKey.isPrimary && (
                                 <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
@@ -897,7 +864,7 @@ function StorePageContent() {
                             if (newKey) {
                               const error = validatePixKey(
                                 pixFormData.type,
-                                newKey
+                                newKey,
                               );
                               setPixKeyError(error);
                             } else {
@@ -952,8 +919,8 @@ function StorePageContent() {
                         {loading
                           ? "Salvando..."
                           : editingPixKey
-                          ? "Atualizar Chave"
-                          : "Adicionar Chave"}
+                            ? "Atualizar Chave"
+                            : "Adicionar Chave"}
                       </button>
                       <button
                         type="button"

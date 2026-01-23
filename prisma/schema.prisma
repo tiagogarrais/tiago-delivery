@@ -128,6 +128,8 @@ model Store {
   deliveryFee     Float? // Taxa de entrega
   freeShippingThreshold Float? // Valor mínimo para frete grátis
 
+  isOpen      Boolean @default(true) // Se a loja está aberta para pedidos
+
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
   pixKeys  PixKey[]

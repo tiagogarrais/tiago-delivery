@@ -42,7 +42,7 @@ export default function MinhasComprasPage() {
 
         // Buscar loja
         const storeResponse = await fetch(
-          `/api/stores?slug=${encodeURIComponent(slug)}`
+          `/api/stores?slug=${encodeURIComponent(slug)}`,
         );
         if (!storeResponse.ok) {
           throw new Error("Loja não encontrada");
@@ -59,7 +59,7 @@ export default function MinhasComprasPage() {
 
         // Buscar pedidos do cliente nesta loja
         const ordersResponse = await fetch(
-          `/api/orders?storeId=${foundStore.id}`
+          `/api/orders?storeId=${foundStore.id}`,
         );
         if (!ordersResponse.ok) {
           throw new Error("Erro ao carregar pedidos");
@@ -230,14 +230,11 @@ export default function MinhasComprasPage() {
                                 year: "numeric",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }
+                              },
                             )}
                           </p>
                         </div>
                         <div className="mt-2 flex items-center gap-4">
-                          <p className="text-xs text-gray-500">
-                            ID: {order.id.slice(0, 8)}...
-                          </p>
                           <p className="text-sm font-semibold text-gray-900">
                             Total: R$ {order.total.toFixed(2)}
                           </p>
@@ -249,26 +246,6 @@ export default function MinhasComprasPage() {
                       </button>
 
                       <div className="flex items-center gap-2">
-                        <Link
-                          href={`/lojas/${slug}/checkout?orderId=${order.id}`}
-                          className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <svg
-                            className="w-4 h-4 mr-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                          </svg>
-                          Ver Pagamento
-                        </Link>
                         <button
                           onClick={() => toggleOrder(order.id)}
                           className="p-2"
@@ -290,6 +267,30 @@ export default function MinhasComprasPage() {
                           </svg>
                         </button>
                       </div>
+                    </div>
+
+                    {/* Botão Ver Pagamento - linha separada */}
+                    <div className="mt-3 px-6">
+                      <Link
+                        href={`/lojas/${slug}/checkout?orderId=${order.id}`}
+                        className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        Ver Pagamento
+                      </Link>
                     </div>
                   </div>
 

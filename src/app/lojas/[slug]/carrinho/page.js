@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import Header from "../../../../components/Header";
 
 export default function CarrinhoLojaPage() {
   const { data: session } = useSession();
@@ -263,6 +264,26 @@ export default function CarrinhoLojaPage() {
         return;
       }
 
+      // Validar valor do troco apenas se o pagamento for em dinheiro E precisar de troco
+      if (paymentMethod === "cash" && needsChange) {
+        const total = calculateTotal();
+        const changeValue = parseFloat(changeAmount);
+
+        if (!changeAmount || isNaN(changeValue)) {
+          setErrors(["Por favor, informe o valor que você terá para pagar."]);
+          setCreatingOrder(false);
+          return;
+        }
+
+        if (changeValue < total) {
+          setErrors([
+            `O valor informado (R$ ${changeValue.toFixed(2)}) é menor que o total do pedido (R$ ${total.toFixed(2)}). Por favor, informe um valor suficiente para cobrir o pedido e o troco.`,
+          ]);
+          setCreatingOrder(false);
+          return;
+        }
+      }
+
       // Preparar dados do pedido
       const orderItems = cart.items.map((item) => ({
         productId: item.product.id,
@@ -345,40 +366,7 @@ export default function CarrinhoLojaPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-gray-900">
-                Tiago Delivery
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              {session ? (
-                <>
-                  <span className="text-gray-700">
-                    Olá, {session.user?.name}
-                  </span>
-                  <Link
-                    href="/painel"
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Painel
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                >
-                  Entrar
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -443,19 +431,6 @@ export default function CarrinhoLojaPage() {
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Error Messages */}
-        {errors.length > 0 && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="text-sm text-red-700">
-              <ul className="list-disc pl-5 space-y-1">
-                {errors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
             </div>
           </div>
         )}
@@ -914,6 +889,19 @@ export default function CarrinhoLojaPage() {
                     </label>
                   </div>
                 </div>
+
+                {/* Error Messages */}
+                {errors.length > 0 && (
+                  <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div className="text-sm text-red-700">
+                      <ul className="list-disc pl-5 space-y-1">
+                        {errors.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={handleFinalizarPedido}
