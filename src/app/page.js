@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -166,12 +167,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Copyright */}
-      <div className="bg-gray-900 text-white py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
-          <p>&copy; 2026 Tiago Delivery. Todos os direitos reservados.</p>
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 }

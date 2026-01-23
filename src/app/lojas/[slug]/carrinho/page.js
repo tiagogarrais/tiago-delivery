@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Header from "../../../../components/Header";
+import Footer from "../../../../components/Footer";
 
 export default function CarrinhoLojaPage() {
   const { data: session } = useSession();
@@ -264,6 +265,13 @@ export default function CarrinhoLojaPage() {
         return;
       }
 
+      // Impedir que o dono da loja finalize pedidos da própria loja
+      if (store.isOwner) {
+        setErrors(["Você não pode finalizar pedidos da sua própria loja."]);
+        setCreatingOrder(false);
+        return;
+      }
+
       // Validar valor do troco apenas se o pagamento for em dinheiro E precisar de troco
       if (paymentMethod === "cash" && needsChange) {
         const total = calculateTotal();
@@ -457,8 +465,8 @@ export default function CarrinhoLojaPage() {
             <div className="lg:col-span-2 space-y-4">
               {/* Store Info */}
               <div className="bg-white rounded-xl shadow-md p-4 mb-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
+                <div className="mb-3">
+                  <div className="mb-3">
                     <h3 className="font-semibold text-gray-900 mb-1">
                       🏪 {store.name}
                     </h3>
@@ -468,7 +476,7 @@ export default function CarrinhoLojaPage() {
                   </div>
                   <Link
                     href={`/lojas/${slug}`}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+                    className="inline-block w-full px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors text-center"
                   >
                     + Adicionar mais itens
                   </Link>
@@ -513,26 +521,26 @@ export default function CarrinhoLojaPage() {
                   key={item.id}
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                 >
-                  <div className="flex">
+                  <div className="flex flex-col">
                     {/* Product Image */}
-                    {item.product.image ? (
-                      <div className="w-32 h-32 flex-shrink-0">
+                    <div className="w-full h-48 flex-shrink-0">
+                      {item.product.image ? (
                         <img
                           src={item.product.image}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                         />
-                      </div>
-                    ) : (
-                      <div className="w-32 h-32 bg-gray-200 flex items-center justify-center flex-shrink-0">
-                        <span className="text-gray-400 text-3xl">🍽️</span>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400 text-4xl">🍽️</span>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Product Info */}
-                    <div className="flex-1 p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
+                    <div className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
                           <h3 className="text-lg font-bold text-gray-900">
                             {item.product.name}
                           </h3>
@@ -545,7 +553,7 @@ export default function CarrinhoLojaPage() {
                         <button
                           onClick={() => removeItem(item.id)}
                           disabled={updating}
-                          className="text-red-600 hover:text-red-700 p-2 disabled:opacity-50"
+                          className="text-red-600 hover:text-red-700 p-2 disabled:opacity-50 ml-2"
                           title="Remover item"
                         >
                           <svg
@@ -564,15 +572,15 @@ export default function CarrinhoLojaPage() {
                         </button>
                       </div>
 
-                      <div className="flex justify-between items-center mt-4">
-                        {/* Quantity Controls */}
-                        <div className="flex items-center space-x-3">
+                      {/* Quantity Controls - Now below image */}
+                      <div className="flex items-center justify-center mb-4">
+                        <div className="flex items-center space-x-3 bg-gray-50 rounded-full px-4 py-2">
                           <button
                             onClick={() =>
                               updateQuantity(item.id, item.quantity - 1)
                             }
                             disabled={updating || item.quantity <= 1}
-                            className="w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-8 h-8 flex items-center justify-center bg-white text-gray-700 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                           >
                             -
                           </button>
@@ -628,24 +636,24 @@ export default function CarrinhoLojaPage() {
                               updateQuantity(item.id, item.quantity + 1)
                             }
                             disabled={updating}
-                            className="w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 disabled:opacity-50"
+                            className="w-8 h-8 flex items-center justify-center bg-white text-gray-700 rounded-full hover:bg-gray-100 disabled:opacity-50 shadow-sm"
                           >
                             +
                           </button>
                         </div>
+                      </div>
 
-                        {/* Price */}
-                        <div className="text-right">
-                          <p className="text-sm text-gray-600">
-                            R$ {parseFloat(item.product.price).toFixed(2)} cada
-                          </p>
-                          <p className="text-xl font-bold text-green-600">
-                            R${" "}
-                            {(
-                              parseFloat(item.product.price) * item.quantity
-                            ).toFixed(2)}
-                          </p>
-                        </div>
+                      {/* Price */}
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">
+                          R$ {parseFloat(item.product.price).toFixed(2)} cada
+                        </p>
+                        <p className="text-xl font-bold text-green-600">
+                          R${" "}
+                          {(
+                            parseFloat(item.product.price) * item.quantity
+                          ).toFixed(2)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -908,7 +916,8 @@ export default function CarrinhoLojaPage() {
                   disabled={
                     creatingOrder ||
                     (store.minimumOrder &&
-                      calculateSubtotal() < parseFloat(store.minimumOrder))
+                      calculateSubtotal() < parseFloat(store.minimumOrder)) ||
+                    store.isOwner
                   }
                   className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -917,6 +926,8 @@ export default function CarrinhoLojaPage() {
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                       Criando pedido...
                     </span>
+                  ) : store.isOwner ? (
+                    "Não é possível finalizar pedidos da própria loja"
                   ) : (
                     "Finalizar Pedido"
                   )}
@@ -933,6 +944,8 @@ export default function CarrinhoLojaPage() {
           </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }

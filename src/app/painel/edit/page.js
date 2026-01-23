@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IMaskInput } from "react-imask";
+import Footer from "../../../components/Footer";
 
 export default function EditProfilePage() {
   const { data: session, status } = useSession();
@@ -368,6 +369,8 @@ export default function EditProfilePage() {
           </form>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

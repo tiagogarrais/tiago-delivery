@@ -7,6 +7,7 @@ import { useEffect, useState, Suspense } from "react";
 import { IMaskInput } from "react-imask";
 import AddressForm from "../../components/AddressForm";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 function ProfileContent() {
   const { data: session, status } = useSession();
@@ -669,9 +670,22 @@ function ProfileContent() {
                 </h2>
                 <Link
                   href="/painel/edit"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2"
                 >
-                  Editar Dados
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                  Editar
                 </Link>
               </div>
 
@@ -1069,69 +1083,7 @@ function ProfileContent() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Tiago Delivery</h4>
-              <p className="text-gray-400">
-                Conectando você aos melhores produtos das melhores lojas.
-              </p>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-4">Links Úteis</h5>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="/" className="hover:text-white">
-                    Página Inicial
-                  </a>
-                </li>
-                <li>
-                  <a href="#sobre" className="hover:text-white">
-                    Sobre Nós
-                  </a>
-                </li>
-                <li>
-                  <a href="#suporte" className="hover:text-white">
-                    Suporte
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-4">Conta</h5>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#profile" className="hover:text-white">
-                    Meu Painel
-                  </a>
-                </li>
-                <li>
-                  <a href="#pedidos" className="hover:text-white">
-                    Meus Pedidos
-                  </a>
-                </li>
-                <li>
-                  <a href="#favoritos" className="hover:text-white">
-                    Favoritos
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-4">Contato</h5>
-              <ul className="space-y-2 text-gray-400">
-                <li>📧 contato@tiagodelivery.com</li>
-                <li>📞 (11) 9999-9999</li>
-                <li>📍 São Paulo, SP</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2026 Tiago Delivery. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

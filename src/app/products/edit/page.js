@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import Header from "../../../components/Header";
+import Footer from "../../../components/Footer";
 
 function EditProductPageContent() {
   const { data: session, status } = useSession();
@@ -345,6 +346,8 @@ function EditProductPageContent() {
           </form>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

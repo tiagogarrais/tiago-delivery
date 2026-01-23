@@ -4,6 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import Footer from "../../components/Footer";
 
 function LoginForm() {
   const { data: session, status } = useSession();
@@ -140,6 +141,8 @@ function LoginForm() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

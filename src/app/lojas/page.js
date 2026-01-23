@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 function LojasContent() {
   const { data: session, status } = useSession();
@@ -50,47 +51,16 @@ function LojasContent() {
 
       try {
         setLoading(true);
-        const response = await fetch("/api/stores");
+        const response = await fetch(
+          `/api/stores?city=${encodeURIComponent(cidade)}&state=${encodeURIComponent(estado)}`,
+        );
         if (response.ok) {
           const data = await response.json();
 
           console.log("Buscando lojas para:", { cidade, estado });
-          console.log("Total de lojas no banco:", data.stores?.length);
+          console.log("Lojas encontradas:", data.stores?.length);
 
-          // Log de todas as lojas para debug
-          data.stores?.forEach((store) => {
-            console.log("Loja:", {
-              nome: store.name,
-              cidade: store.city,
-              estado: store.state,
-            });
-          });
-
-          // Filtrar lojas pela cidade e estado
-          const filteredStores =
-            data.stores?.filter((store) => {
-              const cidadeBanco = store.city?.toLowerCase().trim();
-              const cidadeBusca = cidade.toLowerCase().trim();
-              const estadoBanco = store.state;
-
-              console.log("Comparando:", {
-                loja: store.name,
-                cidadeBanco,
-                cidadeBusca,
-                cidadeMatch: cidadeBanco === cidadeBusca,
-                estadoBanco,
-                estadoBusca: estado,
-                estadoMatch: estadoBanco === estado,
-              });
-
-              const cidadeMatch = cidadeBanco === cidadeBusca;
-              const estadoMatch = estadoBanco === estado;
-
-              return cidadeMatch && estadoMatch;
-            }) || [];
-
-          console.log("Lojas filtradas:", filteredStores.length);
-          setStores(filteredStores);
+          setStores(data.stores || []);
         }
       } catch (error) {
         console.error("Erro ao buscar lojas:", error);
@@ -254,6 +224,8 @@ function LojasContent() {
           </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }

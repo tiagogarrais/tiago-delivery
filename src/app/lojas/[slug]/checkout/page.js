@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import Footer from "../../../../components/Footer";
 
 export default function CheckoutPage() {
   const { data: session } = useSession();
@@ -866,6 +867,8 @@ export default function CheckoutPage() {
           </Link>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { useState, useEffect, Suspense } from "react";
 import StoreForm from "../../components/StoreForm";
 import { IMaskInput } from "react-imask";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 function StorePageContent() {
   const { data: session, status } = useSession();
@@ -1013,6 +1014,8 @@ function StorePageContent() {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

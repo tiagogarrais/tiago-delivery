@@ -8,6 +8,8 @@ export async function GET(request) {
     const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
+    const city = searchParams.get("city");
+    const state = searchParams.get("state");
 
     // Buscar ID do usuário se estiver logado
     let currentUserId = null;
@@ -31,7 +33,7 @@ export async function GET(request) {
       if (!store) {
         return NextResponse.json(
           { error: "Loja não encontrada" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -44,8 +46,23 @@ export async function GET(request) {
       return NextResponse.json({ stores: [storeWithOwnership] });
     }
 
-    // Retornar todas as lojas (públicas), mas incluir informação se é do usuário atual
+    // Construir filtros baseados nos parâmetros
+    const whereClause = {};
+
+    if (city) {
+      whereClause.city = {
+        equals: city.trim(),
+        mode: "insensitive", // Case insensitive
+      };
+    }
+
+    if (state) {
+      whereClause.state = state.trim();
+    }
+
+    // Buscar lojas com filtros aplicados
     const stores = await prisma.store.findMany({
+      where: whereClause,
       orderBy: { createdAt: "desc" },
     });
 
@@ -60,7 +77,7 @@ export async function GET(request) {
     console.error("Erro ao buscar lojas:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -112,7 +129,7 @@ export async function POST(request) {
       const slugRegex = /^[a-z0-9]+$/;
       if (!slugRegex.test(slug)) {
         errors.push(
-          "Identificação deve conter apenas letras minúsculas e números"
+          "Identificação deve conter apenas letras minúsculas e números",
         );
       } else {
         // Verificar se slug já existe
@@ -218,13 +235,13 @@ export async function POST(request) {
             "CNPJ já cadastrado. Uma loja com este CNPJ já existe no sistema.",
           ],
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { errors: ["Erro interno do servidor"] },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -272,7 +289,7 @@ export async function PUT(request) {
     if (!currentStore) {
       return NextResponse.json(
         { error: "Loja não encontrada" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -291,7 +308,7 @@ export async function PUT(request) {
       const slugRegex = /^[a-z0-9]+$/;
       if (!slugRegex.test(slug)) {
         errors.push(
-          "Identificação deve conter apenas letras minúsculas e números"
+          "Identificação deve conter apenas letras minúsculas e números",
         );
       } else if (slug.trim() !== currentStore.slug) {
         // Verificar se slug já existe (apenas se mudou)
@@ -352,7 +369,7 @@ export async function PUT(request) {
     if (!existingStore) {
       return NextResponse.json(
         { errors: ["Loja não encontrada"] },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -385,7 +402,7 @@ export async function PUT(request) {
     console.error("Erro ao atualizar loja:", error);
     return NextResponse.json(
       { errors: ["Erro interno do servidor"] },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -415,7 +432,7 @@ export async function DELETE() {
     if (!existingStore) {
       return NextResponse.json(
         { errors: ["Loja não encontrada"] },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -429,7 +446,7 @@ export async function DELETE() {
     console.error("Erro ao deletar loja:", error);
     return NextResponse.json(
       { errors: ["Erro interno do servidor"] },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

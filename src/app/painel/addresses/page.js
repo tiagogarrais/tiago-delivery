@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import AddressForm from "../../../components/AddressForm";
+import Footer from "../../../components/Footer";
 
 function AddressFormContent() {
   const { data: session, status } = useSession();
@@ -155,13 +156,15 @@ function AddressFormContent() {
               loading
                 ? "Salvando..."
                 : addressId
-                ? "Atualizar Endereço"
-                : "Adicionar Endereço"
+                  ? "Atualizar Endereço"
+                  : "Adicionar Endereço"
             }
             showPrimaryCheckbox={true}
           />
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
