@@ -1020,7 +1020,7 @@ function ProfileContent() {
                       <div className="mt-6 pt-6 border-t border-gray-200">
                         <button
                           onClick={() =>
-                            router.push(`/produtos?storeId=${store.id}`)
+                            router.push(`/products?storeId=${store.id}`)
                           }
                           className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg"
                         >
