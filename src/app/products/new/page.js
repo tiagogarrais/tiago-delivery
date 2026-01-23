@@ -72,7 +72,7 @@ function NewProductPageContent() {
       if (response.ok) {
         setSuccessMessage("Produto cadastrado com sucesso!");
         setTimeout(() => {
-          router.push(`/produtos?storeId=${storeId}`);
+          router.push(`/products?storeId=${storeId}`);
         }, 2000);
       } else {
         const errorData = await response.json();
@@ -87,7 +87,7 @@ function NewProductPageContent() {
   };
 
   const handleCancel = () => {
-    router.push(`/produtos?storeId=${storeId}`);
+    router.push(`/products?storeId=${storeId}`);
   };
 
   if (status === "loading") {

@@ -111,7 +111,7 @@ function EditProductPageContent() {
       if (response.ok) {
         setSuccessMessage("Produto atualizado com sucesso!");
         setTimeout(() => {
-          router.push(`/produtos?storeId=${storeId}`);
+          router.push(`/products?storeId=${storeId}`);
         }, 2000);
       } else {
         const errorData = await response.json();
@@ -126,7 +126,7 @@ function EditProductPageContent() {
   };
 
   const handleCancel = () => {
-    router.push(`/produtos?storeId=${storeId}`);
+    router.push(`/products?storeId=${storeId}`);
   };
 
   if (status === "loading" || loadingProduct) {
