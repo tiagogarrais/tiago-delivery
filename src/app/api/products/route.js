@@ -100,7 +100,7 @@ export async function POST(request) {
     if (images && !Array.isArray(images)) {
       errors.push("Imagens deve ser um array");
     }
-    if (images && images.some(img => typeof img !== 'string')) {
+    if (images && images.some((img) => typeof img !== "string")) {
       errors.push("Imagens deve conter apenas strings");
     }
 
@@ -134,7 +134,7 @@ export async function POST(request) {
         storeId,
         name: name.trim(),
         description: description?.trim() || null,
-        price: parseFloat(price.toString().replace(',', '.')),
+        price: parseFloat(price.toString().replace(",", ".")),
         images: images || [],
         available: available !== undefined ? available : true,
       },
