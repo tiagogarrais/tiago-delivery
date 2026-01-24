@@ -524,9 +524,9 @@ export default function CarrinhoLojaPage() {
                   <div className="flex flex-col">
                     {/* Product Image */}
                     <div className="w-full h-48 flex-shrink-0">
-                      {item.product.image ? (
+                      {(item.product.images && item.product.images.length > 0) || item.product.image ? (
                         <img
-                          src={item.product.image}
+                          src={item.product.images && item.product.images.length > 0 ? item.product.images[0] : item.product.image}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                         />

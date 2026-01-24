@@ -63,10 +63,10 @@ function EditProductPageContent() {
 
       setLoadingProduct(true);
       try {
-        const response = await fetch(`/api/products?storeId=${storeId}`);
+        const response = await fetch(`/api/products/${productId}`);
         if (response.ok) {
           const data = await response.json();
-          const product = data.products?.find((p) => p.id === productId);
+          const product = data.product;
 
           if (product) {
             setFormData({
@@ -332,6 +332,9 @@ function EditProductPageContent() {
                 {/* Botão para adicionar imagem */}
                 <CldUploadWidget
                   uploadPreset="ml_default"
+                  options={{
+                    folder: "tiagodelivery"
+                  }}
                   onUpload={(result) => {
                     if (result.event === "success") {
                       setFormData({

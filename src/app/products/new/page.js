@@ -292,6 +292,9 @@ function NewProductPageContent() {
                 {/* Botão para adicionar imagem */}
                 <CldUploadWidget
                   uploadPreset="ml_default"
+                  options={{
+                    folder: "tiagodelivery"
+                  }}
                   onUpload={(result) => {
                     if (result.event === "success") {
                       setFormData({
