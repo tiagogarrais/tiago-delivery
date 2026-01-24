@@ -260,14 +260,17 @@ function NewProductPageContent() {
                 URL da Imagem
               </label>
               <input
-                type="url"
+                type="text"
                 value={formData.image}
                 onChange={(e) =>
                   setFormData({ ...formData, image: e.target.value })
                 }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://exemplo.com/imagem.jpg"
+                placeholder="/imagem.jpg ou https://exemplo.com/imagem.jpg"
               />
+              <p className="mt-1 text-sm text-gray-500">
+                Para imagens locais, use /nome-da-imagem.jpg
+              </p>
             </div>
 
             <div className="flex items-center">
