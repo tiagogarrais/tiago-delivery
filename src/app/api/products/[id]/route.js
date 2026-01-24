@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const { storeId, name, description, price, image, images, available } =
+    const { storeId, name, description, price, images, available } =
       await request.json();
 
     // Validação básica
@@ -89,8 +89,7 @@ export async function PUT(request, { params }) {
         name: name.trim(),
         description: description?.trim() || null,
         price: parseFloat(price),
-        image: image?.trim() || null, // Mantido para compatibilidade
-        images: images || (image ? [image] : []), // Novo campo
+        images: images || [],
         available: available === true,
       },
     });

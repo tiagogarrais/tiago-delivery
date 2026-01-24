@@ -24,8 +24,7 @@ function EditProductPageContent() {
     name: "",
     description: "",
     price: "",
-    image: "", // Mantido para compatibilidade
-    images: [], // Novo campo para múltiplas imagens
+    images: [], // Campo único para múltiplas imagens
     available: true,
   });
 
@@ -73,8 +72,7 @@ function EditProductPageContent() {
               name: product.name,
               description: product.description || "",
               price: product.price.toString(),
-              image: product.image || "",
-              images: product.images || (product.image ? [product.image] : []), // Carrega imagens existentes
+              images: product.images || [], // Carrega imagens
               available: product.available,
             });
           } else {
@@ -333,17 +331,13 @@ function EditProductPageContent() {
                 <CldUploadWidget
                   uploadPreset="ml_default"
                   options={{
-                    folder: "tiagodelivery"
+                    folder: "tiagodelivery",
                   }}
                   onUpload={(result) => {
                     if (result.event === "success") {
                       setFormData({
                         ...formData,
                         images: [...formData.images, result.info.secure_url],
-                        image:
-                          formData.images.length === 0
-                            ? result.info.secure_url
-                            : formData.image, // Mantém a primeira como image principal
                       });
                     }
                   }}

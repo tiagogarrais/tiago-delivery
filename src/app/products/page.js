@@ -262,13 +262,13 @@ function ProductsPageContent() {
                   key={product.id}
                   className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                 >
-                  {(product.images && product.images.length > 0) || product.image ? (
+                  {product.images && product.images.length > 0 && (
                     <img
-                      src={product.images && product.images.length > 0 ? product.images[0] : product.image}
+                      src={product.images[0]}
                       alt={product.name}
                       className="w-full h-48 object-cover"
                     />
-                  ) : null}
+                  )}
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                       {product.name}

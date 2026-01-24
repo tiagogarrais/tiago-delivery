@@ -547,9 +547,9 @@ export default function LojaPage() {
                 className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="aspect-w-1 aspect-h-1 bg-gray-200">
-                  {(product.images && product.images.length > 0) || product.image ? (
+                  {product.images && product.images.length > 0 ? (
                     <img
-                      src={product.images && product.images.length > 0 ? product.images[0] : product.image}
+                      src={product.images[0]}
                       alt={product.name}
                       className="w-full h-48 object-cover"
                     />

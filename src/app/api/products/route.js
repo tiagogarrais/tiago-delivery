@@ -82,8 +82,7 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { storeId, name, description, price, image, images, available } =
-      body;
+    const { storeId, name, description, price, images, available } = body;
 
     const errors = [];
 
@@ -95,6 +94,14 @@ export async function POST(request) {
     }
     if (price === undefined || price === null || price === "") {
       errors.push("Preço é obrigatório");
+    } else if (isNaN(parseFloat(price))) {
+      errors.push("Preço deve ser um número válido");
+    }
+    if (images && !Array.isArray(images)) {
+      errors.push("Imagens deve ser um array");
+    }
+    if (images && images.some(img => typeof img !== 'string')) {
+      errors.push("Imagens deve conter apenas strings");
     }
 
     if (errors.length > 0) {
@@ -128,8 +135,7 @@ export async function POST(request) {
         name: name.trim(),
         description: description?.trim() || null,
         price: parseFloat(price),
-        image: image?.trim() || null, // Mantido para compatibilidade
-        images: images || (image ? [image] : []), // Novo campo
+        images: images || [],
         available: available !== undefined ? available : true,
       },
     });

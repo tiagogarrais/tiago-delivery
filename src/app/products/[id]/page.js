@@ -274,12 +274,6 @@ export default function ProductPage() {
             <div className="md:w-1/2 relative">
               {product.images && product.images.length > 0 ? (
                 <ImageCarousel images={product.images} alt={product.name} />
-              ) : product.image ? (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-96 object-cover"
-                />
               ) : (
                 <div className="w-full h-96 bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-500">Sem imagem</span>

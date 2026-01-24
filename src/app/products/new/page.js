@@ -22,8 +22,7 @@ function NewProductPageContent() {
     name: "",
     description: "",
     price: "",
-    image: "", // Mantido para compatibilidade
-    images: [], // Novo campo para múltiplas imagens
+    images: [], // Campo único para múltiplas imagens
     available: true,
   });
 
@@ -293,17 +292,13 @@ function NewProductPageContent() {
                 <CldUploadWidget
                   uploadPreset="ml_default"
                   options={{
-                    folder: "tiagodelivery"
+                    folder: "tiagodelivery",
                   }}
                   onUpload={(result) => {
                     if (result.event === "success") {
                       setFormData({
                         ...formData,
                         images: [...formData.images, result.info.secure_url],
-                        image:
-                          formData.images.length === 0
-                            ? result.info.secure_url
-                            : formData.image, // Mantém a primeira como image principal
                       });
                     }
                   }}
