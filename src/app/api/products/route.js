@@ -134,7 +134,7 @@ export async function POST(request) {
         storeId,
         name: name.trim(),
         description: description?.trim() || null,
-        price: parseFloat(price),
+        price: parseFloat(price.toString().replace(',', '.')),
         images: images || [],
         available: available !== undefined ? available : true,
       },
