@@ -572,9 +572,11 @@ export default function LojaPage() {
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">
-                    {product.name}
-                  </h3>
+                  <Link href={`/products/${product.id}`}>
+                    <h3 className="text-lg font-medium text-gray-900 mb-1 hover:text-blue-600 cursor-pointer">
+                      {product.name}
+                    </h3>
+                  </Link>
                   {product.description && (
                     <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                       {product.description}
@@ -586,7 +588,7 @@ export default function LojaPage() {
                     </span>
                     {store.isOwner ? (
                       <Link
-                        href={`/products/edit?id=${product.id}`}
+                        href={`/products/edit?id=${product.id}&storeId=${store.id}`}
                         className="bg-purple-600 text-white px-3 py-1 rounded-md hover:bg-purple-700 text-sm"
                       >
                         Editar

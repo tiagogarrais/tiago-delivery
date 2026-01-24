@@ -3,6 +3,35 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+// GET: Buscar produto específico
+export async function GET(request, { params }) {
+  const { id } = await params;
+
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        store: true,
+      },
+    });
+
+    if (!product) {
+      return NextResponse.json(
+        { error: "Produto não encontrado" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({ product });
+  } catch (error) {
+    console.error("Erro ao buscar produto:", error);
+    return NextResponse.json(
+      { error: "Erro interno do servidor" },
+      { status: 500 },
+    );
+  }
+}
+
 // PUT: Atualizar produto
 export async function PUT(request, { params }) {
   const { id } = await params;
@@ -14,7 +43,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const { storeId, name, description, price, image, available } =
+    const { storeId, name, description, price, image, images, available } =
       await request.json();
 
     // Validação básica
@@ -41,7 +70,7 @@ export async function PUT(request, { params }) {
     if (!existingProduct) {
       return NextResponse.json(
         { error: "Produto não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -49,7 +78,7 @@ export async function PUT(request, { params }) {
     if (existingProduct.store.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Você não tem permissão para editar este produto" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -60,7 +89,8 @@ export async function PUT(request, { params }) {
         name: name.trim(),
         description: description?.trim() || null,
         price: parseFloat(price),
-        image: image?.trim() || null,
+        image: image?.trim() || null, // Mantido para compatibilidade
+        images: images || (image ? [image] : []), // Novo campo
         available: available === true,
       },
     });
@@ -75,7 +105,7 @@ export async function PUT(request, { params }) {
     console.error("Erro ao atualizar produto:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -102,7 +132,7 @@ export async function DELETE(request, { params }) {
     if (!existingProduct) {
       return NextResponse.json(
         { error: "Produto não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -110,7 +140,7 @@ export async function DELETE(request, { params }) {
     if (existingProduct.store.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Você não tem permissão para excluir este produto" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -128,7 +158,7 @@ export async function DELETE(request, { params }) {
     console.error("Erro ao excluir produto:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

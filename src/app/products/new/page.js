@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
+import { CldUploadWidget } from "next-cloudinary";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 
@@ -21,7 +22,8 @@ function NewProductPageContent() {
     name: "",
     description: "",
     price: "",
-    image: "",
+    image: "", // Mantido para compatibilidade
+    images: [], // Novo campo para múltiplas imagens
     available: true,
   });
 
@@ -257,19 +259,67 @@ function NewProductPageContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                URL da Imagem
+                Imagens do Produto
               </label>
-              <input
-                type="text"
-                value={formData.image}
-                onChange={(e) =>
-                  setFormData({ ...formData, image: e.target.value })
-                }
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="/imagem.jpg ou https://exemplo.com/imagem.jpg"
-              />
+              <div className="space-y-4">
+                {/* Lista de imagens carregadas */}
+                {formData.images.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {formData.images.map((img, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={img}
+                          alt={`Imagem ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newImages = formData.images.filter(
+                              (_, i) => i !== index,
+                            );
+                            setFormData({ ...formData, images: newImages });
+                          }}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Botão para adicionar imagem */}
+                <CldUploadWidget
+                  uploadPreset="ml_default"
+                  onUpload={(result) => {
+                    if (result.event === "success") {
+                      setFormData({
+                        ...formData,
+                        images: [...formData.images, result.info.secure_url],
+                        image:
+                          formData.images.length === 0
+                            ? result.info.secure_url
+                            : formData.image, // Mantém a primeira como image principal
+                      });
+                    }
+                  }}
+                >
+                  {({ open }) => {
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => open()}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:bg-gray-50"
+                      >
+                        + Adicionar Imagem
+                      </button>
+                    );
+                  }}
+                </CldUploadWidget>
+              </div>
               <p className="mt-1 text-sm text-gray-500">
-                Para imagens locais, use /nome-da-imagem.jpg
+                Faça upload de uma ou mais imagens para o produto
               </p>
             </div>
 

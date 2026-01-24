@@ -158,7 +158,8 @@ model Product {
   name        String
   description String?
   price       Float
-  image       String?
+  image       String? // Mantido para compatibilidade
+  images      String[] // Novo campo para múltiplas imagens
   available   Boolean @default(true)
 
   store     Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)

@@ -26,7 +26,7 @@ export async function GET(request) {
     if (!storeId) {
       return NextResponse.json(
         { error: "ID da loja é obrigatório" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function GET(request) {
     if (!store) {
       return NextResponse.json(
         { error: "Loja não encontrada" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -59,7 +59,7 @@ export async function GET(request) {
     console.error("Erro ao buscar produtos:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -82,7 +82,8 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { storeId, name, description, price, image, available } = body;
+    const { storeId, name, description, price, image, images, available } =
+      body;
 
     const errors = [];
 
@@ -108,7 +109,7 @@ export async function POST(request) {
     if (!store) {
       return NextResponse.json(
         { errors: ["Loja não encontrada"] },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -117,7 +118,7 @@ export async function POST(request) {
         {
           errors: ["Você não tem permissão para adicionar produtos nesta loja"],
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -127,7 +128,8 @@ export async function POST(request) {
         name: name.trim(),
         description: description?.trim() || null,
         price: parseFloat(price),
-        image: image?.trim() || null,
+        image: image?.trim() || null, // Mantido para compatibilidade
+        images: images || (image ? [image] : []), // Novo campo
         available: available !== undefined ? available : true,
       },
     });
@@ -137,7 +139,7 @@ export async function POST(request) {
     console.error("Erro ao criar produto:", error);
     return NextResponse.json(
       { errors: ["Erro interno do servidor"] },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
