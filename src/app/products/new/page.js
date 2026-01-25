@@ -296,7 +296,7 @@ function NewProductPageContent() {
                   }}
                   onUpload={(result) => {
                     if (result.event === "success") {
-                      setFormData(prev => ({
+                      setFormData((prev) => ({
                         ...prev,
                         images: [...prev.images, result.info.secure_url],
                       }));
