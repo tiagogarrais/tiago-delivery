@@ -369,14 +369,17 @@ function EditProductPageContent() {
                     // Processar múltiplos arquivos
                     if (result?.info?.files && result.info.files.length > 0) {
                       imageUrls = result.info.files
-                        .map(file => file?.uploadInfo?.secure_url)
-                        .filter(url => url);
+                        .map((file) => file?.uploadInfo?.secure_url)
+                        .filter((url) => url);
                     } else if (result?.info?.secure_url) {
                       imageUrls = [result.info.secure_url];
-                    } else if (result?.data?.files && result.data.files.length > 0) {
+                    } else if (
+                      result?.data?.files &&
+                      result.data.files.length > 0
+                    ) {
                       imageUrls = result.data.files
-                        .map(file => file?.uploadInfo?.secure_url)
-                        .filter(url => url);
+                        .map((file) => file?.uploadInfo?.secure_url)
+                        .filter((url) => url);
                     }
 
                     if (imageUrls.length > 0) {
@@ -462,7 +465,8 @@ function EditProductPageContent() {
                 </CldUploadWidget>
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                Faça upload de até 5 imagens para o produto (PNG, JPG até 10MB cada)
+                Faça upload de até 5 imagens para o produto (PNG, JPG até 10MB
+                cada)
               </p>
             </div>
 
