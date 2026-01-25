@@ -141,11 +141,13 @@ function LojasContent() {
                 }`}
               >
                 {store.image && (
-                  <img
-                    src={store.image}
-                    alt={`Imagem da loja ${store.name}`}
-                    className="w-full h-48 object-cover"
-                  />
+                  <div className="aspect-square">
+                    <img
+                      src={store.image}
+                      alt={`Imagem da loja ${store.name}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 )}
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-2">

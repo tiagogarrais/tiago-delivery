@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 
-export default function ProductImageCarousel({ images, productName, className = "" }) {
+export default function ProductImageCarousel({
+  images,
+  productName,
+  className = "",
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -12,7 +16,7 @@ export default function ProductImageCarousel({ images, productName, className = 
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+        prevIndex === images.length - 1 ? 0 : prevIndex + 1,
       );
     }, 3000); // Change image every 3 seconds
 
@@ -42,7 +46,9 @@ export default function ProductImageCarousel({ images, productName, className = 
   // If only one image or no images, show simple image
   if (!images || images.length <= 1) {
     return (
-      <div className={`w-full h-48 bg-gray-200 flex items-center justify-center ${className}`}>
+      <div
+        className={`w-full h-48 bg-gray-200 flex items-center justify-center ${className}`}
+      >
         {images && images.length > 0 ? (
           <img
             src={images[0]}
@@ -95,8 +101,18 @@ export default function ProductImageCarousel({ images, productName, className = 
         className="absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 sm:p-1.5 rounded-full hover:bg-opacity-75 transition-all opacity-0 group-hover:opacity-100 hover:opacity-100"
         aria-label="Imagem anterior"
       >
-        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        <svg
+          className="w-3 h-3 sm:w-4 sm:h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
       </button>
 
@@ -105,8 +121,18 @@ export default function ProductImageCarousel({ images, productName, className = 
         className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 sm:p-1.5 rounded-full hover:bg-opacity-75 transition-all opacity-0 group-hover:opacity-100 hover:opacity-100"
         aria-label="Próxima imagem"
       >
-        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        <svg
+          className="w-3 h-3 sm:w-4 sm:h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
         </svg>
       </button>
 
