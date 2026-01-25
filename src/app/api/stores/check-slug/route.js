@@ -24,9 +24,13 @@ export async function GET(request) {
       );
     }
 
-    // Verificar se o slug já existe
+    // Verificar se o slug já existe - usando select para evitar problemas com colunas que podem não existir
     const existingStore = await prisma.store.findUnique({
       where: { slug },
+      select: {
+        id: true,
+        slug: true,
+      },
     });
 
     return NextResponse.json({
