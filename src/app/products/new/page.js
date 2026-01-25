@@ -16,8 +16,18 @@ function NewProductPageContent() {
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
+  const [uploadTimeout, setUploadTimeout] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errors, setErrors] = useState([]);
+
+  // Limpar timeout quando componente desmontar
+  useEffect(() => {
+    return () => {
+      if (uploadTimeout) {
+        clearTimeout(uploadTimeout);
+      }
+    };
+  }, [uploadTimeout]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -294,6 +304,7 @@ function NewProductPageContent() {
                   uploadPreset="ml_default"
                   options={{
                     folder: "tiagodelivery/products",
+                    maxFiles: 5,
                   }}
                   onUpload={(result) => {
                     if (result.event === "success" && result.info?.secure_url) {
@@ -302,21 +313,72 @@ function NewProductPageContent() {
                         images: [...prev.images, result.info.secure_url],
                       }));
                       setImageUploading(false);
+                      if (uploadTimeout) {
+                        clearTimeout(uploadTimeout);
+                        setUploadTimeout(null);
+                      }
                     }
                   }}
-                  onQueuesEnd={() => {
+                  onQueuesEnd={(result) => {
+                    if (uploadTimeout) {
+                      clearTimeout(uploadTimeout);
+                      setUploadTimeout(null);
+                    }
+
+                    let imageUrls = [];
+
+                    // Processar múltiplos arquivos
+                    if (result?.info?.files && result.info.files.length > 0) {
+                      imageUrls = result.info.files
+                        .map(file => file?.uploadInfo?.secure_url)
+                        .filter(url => url);
+                    } else if (result?.info?.secure_url) {
+                      imageUrls = [result.info.secure_url];
+                    } else if (result?.data?.files && result.data.files.length > 0) {
+                      imageUrls = result.data.files
+                        .map(file => file?.uploadInfo?.secure_url)
+                        .filter(url => url);
+                    }
+
+                    if (imageUrls.length > 0) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        images: [...prev.images, ...imageUrls],
+                      }));
+                    }
                     setImageUploading(false);
+                  }}
+                  onError={(error) => {
+                    console.error("Upload error:", error);
+                    if (uploadTimeout) {
+                      clearTimeout(uploadTimeout);
+                      setUploadTimeout(null);
+                    }
+                    setImageUploading(false);
+                  }}
+                  onClose={() => {
+                    setTimeout(() => {
+                      if (imageUploading) {
+                        setImageUploading(false);
+                        if (uploadTimeout) {
+                          clearTimeout(uploadTimeout);
+                          setUploadTimeout(null);
+                        }
+                      }
+                    }, 100);
                   }}
                 >
                   {({ open }) => {
                     const handleClick = () => {
+                      if (uploadTimeout) {
+                        clearTimeout(uploadTimeout);
+                      }
                       setImageUploading(true);
-                      open();
-
-                      // Timeout de segurança
-                      setTimeout(() => {
+                      const timeout = setTimeout(() => {
                         setImageUploading(false);
                       }, 30000);
+                      setUploadTimeout(timeout);
+                      open();
                     };
 
                     return (
@@ -324,18 +386,44 @@ function NewProductPageContent() {
                         type="button"
                         onClick={handleClick}
                         disabled={imageUploading}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {imageUploading
-                          ? "Carregando..."
-                          : "+ Adicionar Imagem"}
+                        <div className="flex items-center justify-center space-x-2">
+                          {imageUploading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                              <span className="text-gray-600">
+                                Enviando imagem...
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                className="w-5 h-5 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                />
+                              </svg>
+                              <span className="text-gray-600">
+                                + Adicionar Imagem
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </button>
                     );
                   }}
                 </CldUploadWidget>
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                Faça upload de uma ou mais imagens para o produto
+                Faça upload de até 5 imagens para o produto (PNG, JPG até 10MB cada)
               </p>
             </div>
 
