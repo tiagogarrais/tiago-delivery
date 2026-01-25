@@ -122,8 +122,16 @@ Este comando irá automaticamente:
 
 - ✅ Iniciar os containers Docker (PostgreSQL)
 - ✅ Gerar o Prisma Client
-- ✅ Aplicar as migrações do banco de dados
 - ✅ Iniciar o servidor Next.js em [http://localhost:3000](http://localhost:3000)
+
+**⚠️ IMPORTANTE: Preservação de Dados**
+
+Para **evitar perda de dados** durante o desenvolvimento:
+
+1. **Use `npm run dev`** para desenvolvimento normal (sem aplicar migrações automaticamente)
+2. **Use `npm run dev:migrate`** apenas quando precisar aplicar novas migrações
+3. **Não pare os containers Docker** (`npm run docker:stop`) se quiser manter os dados
+4. **Dados são persistidos** automaticamente graças aos volumes Docker configurados
 
 ### Comandos Úteis
 
@@ -132,6 +140,8 @@ npm run docker:start   # Inicia apenas os containers Docker
 npm run docker:stop    # Para os containers Docker
 npm run docker:logs    # Visualiza logs dos containers
 npm run prisma:migrate # Cria e aplica migrações em desenvolvimento
+npm run prisma:deploy  # Aplica migrações em produção
+npm run dev:migrate    # Desenvolvimento COM aplicação de migrações
 npx prisma studio      # Abre interface visual do banco de dados
 ```
 
@@ -215,14 +225,16 @@ public/
 
 ## Scripts Disponíveis
 
-- `npm run dev` - Inicia Docker, banco de dados e servidor de desenvolvimento
+- `npm run dev` - Inicia Docker, banco de dados e servidor de desenvolvimento (SEM migrações automáticas)
+- `npm run dev:migrate` - Desenvolvimento COM aplicação automática de migrações
 - `npm run build` - Build para produção
 - `npm start` - Inicia o servidor de produção
 - `npm run docker:start` - Inicia apenas os containers Docker
 - `npm run docker:stop` - Para os containers Docker
 - `npm run docker:logs` - Visualiza logs dos containers
-- `npx prisma generate` - Gera o cliente Prisma
-- `npx prisma migrate dev` - Cria e aplica migrações em desenvolvimento
+- `npm run prisma:generate` - Gera o cliente Prisma
+- `npm run prisma:migrate` - Cria migrações em desenvolvimento
+- `npm run prisma:deploy` - Aplica migrações em produção
 - `npx prisma studio` - Abre interface visual do banco de dados
 
 ## Funcionalidades Implementadas
