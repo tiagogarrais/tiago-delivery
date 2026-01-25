@@ -284,7 +284,7 @@ export default function EditProfilePage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 WhatsApp (opcional)
               </label>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <select
                   value={formData.whatsappCountryCode}
                   onChange={(e) =>
