@@ -64,12 +64,15 @@ function StorePageContent() {
         if (response.ok) {
           const data = await response.json();
           const store = data.stores?.find((s) => s.id === storeId);
+          console.log("Store data from API:", store);
+          console.log("Store image field:", store?.image);
 
           if (store) {
             setInitialData({
               name: store.name,
               slug: store.slug,
               description: store.description || "",
+              image: store.image || "",
               category: store.category,
               cnpj: store.cnpj,
               phone: store.phone,

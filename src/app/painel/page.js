@@ -955,18 +955,27 @@ function ProfileContent() {
                       className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
                     >
                       <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900">
-                            {store.name}
-                          </h3>
-                          {store.description && (
-                            <p className="text-gray-600 mt-1">
-                              {store.description}
-                            </p>
+                        <div className="flex items-start space-x-4">
+                          {store.image && (
+                            <img
+                              src={store.image}
+                              alt={`Imagem da loja ${store.name}`}
+                              className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                            />
                           )}
-                          <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                            {store.category}
-                          </span>
+                          <div>
+                            <h3 className="text-xl font-semibold text-gray-900">
+                              {store.name}
+                            </h3>
+                            {store.description && (
+                              <p className="text-gray-600 mt-1">
+                                {store.description}
+                              </p>
+                            )}
+                            <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                              {store.category}
+                            </span>
+                          </div>
                         </div>
                         <button
                           onClick={() => router.push(`/store?id=${store.id}`)}

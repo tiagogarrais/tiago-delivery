@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { IMaskInput } from "react-imask";
+import { CldUploadWidget } from "next-cloudinary";
 
 export default function StoreForm({
   onSubmit,
@@ -14,6 +15,9 @@ export default function StoreForm({
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
+  const [image, setImage] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadTimeout, setUploadTimeout] = useState(null);
   const [category, setCategory] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [phone, setPhone] = useState("");
@@ -66,9 +70,13 @@ export default function StoreForm({
   // Sincronizar valores quando initialData muda (para edição)
   useEffect(() => {
     if (initialData) {
+      console.log("StoreForm - initialData:", initialData);
+      console.log("StoreForm - initialData.image:", initialData.image);
       setName(initialData.name || "");
       setSlug(initialData.slug || "");
       setDescription(initialData.description || "");
+      setImage(initialData.image || "");
+      console.log("StoreForm - image state set to:", initialData.image || "");
       setCategory(initialData.category || "");
       setCnpj(initialData.cnpj || "");
       setPhone(initialData.phone || "");
@@ -86,6 +94,15 @@ export default function StoreForm({
     }
   }, [initialData]);
 
+  // Limpar timeout quando componente desmontar
+  useEffect(() => {
+    return () => {
+      if (uploadTimeout) {
+        clearTimeout(uploadTimeout);
+      }
+    };
+  }, [uploadTimeout]);
+
   const handleZipCodeChange = async (value) => {
     setZipCode(value);
     const cleanZipCode = value.replace(/\D/g, "");
@@ -94,7 +111,7 @@ export default function StoreForm({
       setZipCodeLoading(true);
       try {
         const response = await fetch(
-          `https://viacep.com.br/ws/${cleanZipCode}/json/`
+          `https://viacep.com.br/ws/${cleanZipCode}/json/`,
         );
         const data = await response.json();
 
@@ -103,7 +120,7 @@ export default function StoreForm({
           const cityData = cities.find(
             (city) =>
               city.name.toLowerCase() === data.localidade.toLowerCase() &&
-              city.state_id.toString() === stateCode
+              city.state_id.toString() === stateCode,
           );
 
           // Só atualizar se a API retornar valores
@@ -128,6 +145,7 @@ export default function StoreForm({
       name,
       slug,
       description,
+      image,
       category,
       cnpj,
       phone,
@@ -155,7 +173,7 @@ export default function StoreForm({
     setSlugChecking(true);
     try {
       const response = await fetch(
-        `/api/stores/check-slug?slug=${encodeURIComponent(slug)}`
+        `/api/stores/check-slug?slug=${encodeURIComponent(slug)}`,
       );
       const data = await response.json();
       setSlugAvailable(data.available);
@@ -207,10 +225,10 @@ export default function StoreForm({
                 !!initialData
                   ? "bg-gray-100 text-gray-500 cursor-not-allowed" // Estilo desabilitado
                   : slugAvailable === true
-                  ? "border-green-500"
-                  : slugAvailable === false
-                  ? "border-red-500"
-                  : "border-gray-300"
+                    ? "border-green-500"
+                    : slugAvailable === false
+                      ? "border-red-500"
+                      : "border-gray-300"
               }`}
               placeholder="exemplo-loja123"
               required
@@ -253,6 +271,233 @@ export default function StoreForm({
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Descreva sua loja (opcional)"
           />
+        </div>
+
+        {/* Imagem da Loja */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Imagem da Loja
+          </label>
+          {image && (
+            <div className="mb-4">
+              <div className="relative inline-block">
+                <img
+                  src={image}
+                  alt="Pré-visualização da imagem da loja"
+                  className="w-48 h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setImage("")}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 transition-colors shadow-md"
+                  title="Remover imagem"
+                >
+                  ×
+                </button>
+              </div>
+              <p className="text-sm text-green-600 mt-2 flex items-center">
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Imagem carregada com sucesso
+              </p>
+            </div>
+          )}
+          <CldUploadWidget
+            uploadPreset="ml_default"
+            options={{
+              folder: "tiagodelivery/stores",
+              multiple: false,
+              maxFiles: 1,
+            }}
+            onUpload={(result) => {
+              console.log("onUpload - Event:", result.event);
+              console.log("onUpload - Full result:", result);
+
+              // Resetar loading apenas no evento de sucesso
+              if (result.event === "success") {
+                console.log("Upload successful! URL:", result.info.secure_url);
+                setImage(result.info.secure_url);
+                setUploadingImage(false);
+
+                // Limpar timeout
+                if (uploadTimeout) {
+                  clearTimeout(uploadTimeout);
+                  setUploadTimeout(null);
+                }
+              }
+            }}
+            onQueuesEnd={(result, { widget }) => {
+              console.log("onQueuesEnd called - Full result:", result);
+              console.log("result.info:", result?.info);
+              console.log("result.data:", result?.data);
+
+              // Limpar timeout
+              if (uploadTimeout) {
+                clearTimeout(uploadTimeout);
+                setUploadTimeout(null);
+              }
+
+              // Tentar múltiplas formas de obter a URL da imagem
+              let imageUrl = null;
+
+              // 1. Tentar result.info.files[0].uploadInfo.secure_url (estrutura correta baseada nos logs)
+              if (
+                result?.info?.files &&
+                result.info.files.length > 0 &&
+                result.info.files[0]?.uploadInfo?.secure_url
+              ) {
+                imageUrl = result.info.files[0].uploadInfo.secure_url;
+                console.log(
+                  "Image URL from result.info.files[0].uploadInfo.secure_url:",
+                  imageUrl,
+                );
+              }
+              // 2. Tentar result.info.secure_url (estrutura padrão)
+              else if (result?.info?.secure_url) {
+                imageUrl = result.info.secure_url;
+                console.log("Image URL from result.info.secure_url:", imageUrl);
+              }
+              // 3. Tentar result.data.files (quando há múltiplos arquivos)
+              else if (result?.data?.files && result.data.files.length > 0) {
+                imageUrl = result.data.files[0]?.uploadInfo?.secure_url;
+                console.log("Image URL from result.data.files[0]:", imageUrl);
+              }
+              // 4. Tentar result.data.info.files (estrutura alternativa)
+              else if (
+                result?.data?.info?.files &&
+                result.data.info.files.length > 0 &&
+                result.data.info.files[0]?.uploadInfo?.secure_url
+              ) {
+                imageUrl = result.data.info.files[0].uploadInfo.secure_url;
+                console.log(
+                  "Image URL from result.data.info.files[0]:",
+                  imageUrl,
+                );
+              }
+              // 5. Tentar result.data.info (estrutura alternativa)
+              else if (result?.data?.info?.secure_url) {
+                imageUrl = result.data.info.secure_url;
+                console.log(
+                  "Image URL from result.data.info.secure_url:",
+                  imageUrl,
+                );
+              }
+
+              if (imageUrl) {
+                console.log("Setting image from onQueuesEnd:", imageUrl);
+                setImage(imageUrl);
+                setUploadingImage(false);
+              } else {
+                console.error(
+                  "No image URL found in onQueuesEnd. Full result:",
+                  JSON.stringify(result),
+                );
+                // Resetar loading mesmo sem imagem
+                setUploadingImage(false);
+              }
+            }}
+            onError={(error) => {
+              console.error("Upload error:", error);
+              console.log("Clearing upload timeout due to error");
+              if (uploadTimeout) {
+                clearTimeout(uploadTimeout);
+                setUploadTimeout(null);
+              }
+              setUploadingImage(false);
+            }}
+            onClose={() => {
+              console.log(
+                "Widget closed - uploadingImage:",
+                uploadingImage,
+                "- image:",
+                image,
+              );
+              // onQueuesEnd já deve ter sido chamado, então apenas garantir reset
+              setTimeout(() => {
+                if (uploadingImage) {
+                  console.log("Force resetting loading state on close");
+                  setUploadingImage(false);
+                  if (uploadTimeout) {
+                    clearTimeout(uploadTimeout);
+                    setUploadTimeout(null);
+                  }
+                }
+              }, 100);
+            }}
+          >
+            {({ open }) => {
+              const handleClick = () => {
+                console.log("Opening Cloudinary widget");
+
+                // Resetar estado antes de abrir
+                if (uploadTimeout) {
+                  clearTimeout(uploadTimeout);
+                }
+
+                setUploadingImage(true);
+
+                // Timeout de segurança - resetar loading após 30 segundos
+                const timeout = setTimeout(() => {
+                  console.log("Upload timeout - resetting loading state");
+                  setUploadingImage(false);
+                }, 30000);
+                setUploadTimeout(timeout);
+
+                open();
+              };
+              return (
+                <button
+                  type="button"
+                  onClick={handleClick}
+                  disabled={uploadingImage}
+                  className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    {uploadingImage ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                        <span className="text-gray-600">
+                          Enviando imagem...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-5 h-5 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                          />
+                        </svg>
+                        <span className="text-gray-600">
+                          {image ? "Alterar Imagem" : "Selecionar Imagem"}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </button>
+              );
+            }}
+          </CldUploadWidget>
+          <p className="mt-1 text-sm text-gray-500">
+            Faça upload de uma imagem para representar sua loja (PNG, JPG até
+            10MB)
+          </p>
         </div>
 
         {/* Categoria */}

@@ -113,6 +113,7 @@ model Store {
   cnpj        String  @unique
   phone       String
   email       String
+  image       String? // URL da imagem da loja
 
   // Endereço da loja
   street       String

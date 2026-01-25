@@ -30,6 +30,7 @@ export async function PUT(request, { params }) {
       name,
       slug,
       description,
+      image,
       category,
       cnpj,
       phone,
@@ -53,7 +54,7 @@ export async function PUT(request, { params }) {
       const slugRegex = /^[a-z0-9]+$/;
       if (!slugRegex.test(slug)) {
         errors.push(
-          "Identificação deve conter apenas letras minúsculas e números"
+          "Identificação deve conter apenas letras minúsculas e números",
         );
       }
     }
@@ -108,7 +109,7 @@ export async function PUT(request, { params }) {
     if (!existingStore) {
       return NextResponse.json(
         { errors: ["Loja não encontrada"] },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -117,18 +118,18 @@ export async function PUT(request, { params }) {
         "Tentativa de editar loja de outro usuário. Store userId:",
         existingStore.userId,
         "Session userId:",
-        session.user.id
+        session.user.id,
       );
       return NextResponse.json(
         { errors: ["Você não tem permissão para editar esta loja"] },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Verificar se o slug está sendo alterado (não permitido)
     if (slug.trim() !== existingStore.slug) {
       errors.push(
-        "A identificação única da loja não pode ser alterada após a criação"
+        "A identificação única da loja não pode ser alterada após a criação",
       );
     }
 
@@ -144,6 +145,7 @@ export async function PUT(request, { params }) {
       data: {
         name: name.trim(),
         description: description?.trim() || null,
+        image: image?.trim() || null,
         category: category.trim(),
         cnpj: cnpj.trim(),
         phone: phone.trim(),
@@ -175,13 +177,13 @@ export async function PUT(request, { params }) {
             "CNPJ já cadastrado. Uma loja com este CNPJ já existe no sistema.",
           ],
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { errors: ["Erro interno do servidor"] },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -213,14 +215,14 @@ export async function DELETE(request, { params }) {
     if (!existingStore) {
       return NextResponse.json(
         { error: "Loja não encontrada" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (existingStore.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Você não tem permissão para deletar esta loja" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -234,7 +236,7 @@ export async function DELETE(request, { params }) {
     console.error("Erro ao deletar loja:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
