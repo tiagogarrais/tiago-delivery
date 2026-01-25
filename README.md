@@ -118,31 +118,26 @@ Uma plataforma de delivery completa onde empresas podem cadastrar suas lojas e p
 npm run dev
 ```
 
-Este comando irá automaticamente:
+Este comando irá:
 
-- ✅ Iniciar os containers Docker (PostgreSQL)
-- ✅ Gerar o Prisma Client
+- ✅ Gerar o cliente Prisma
 - ✅ Iniciar o servidor Next.js em [http://localhost:3000](http://localhost:3000)
 
-**⚠️ IMPORTANTE: Preservação de Dados**
+### Desenvolvimento com Migrações
 
-Para **evitar perda de dados** durante o desenvolvimento:
+```bash
+npm run dev:migrate
+```
 
-1. **Use `npm run dev`** para desenvolvimento normal (sem aplicar migrações automaticamente)
-2. **Use `npm run dev:migrate`** apenas quando precisar aplicar novas migrações
-3. **Não pare os containers Docker** (`npm run docker:stop`) se quiser manter os dados
-4. **Dados são persistidos** automaticamente graças aos volumes Docker configurados
+Aplica migrações automaticamente no banco remoto e inicia o servidor.
 
 ### Comandos Úteis
 
 ```bash
-npm run docker:start   # Inicia apenas os containers Docker
-npm run docker:stop    # Para os containers Docker
-npm run docker:logs    # Visualiza logs dos containers
-npm run prisma:migrate # Cria e aplica migrações em desenvolvimento
-npm run prisma:deploy  # Aplica migrações em produção
-npm run dev:migrate    # Desenvolvimento COM aplicação de migrações
-npx prisma studio      # Abre interface visual do banco de dados
+npm run prisma:studio    # Abre interface visual do banco remoto
+npm run prisma:migrate   # Cria novas migrações
+npm run prisma:deploy    # Aplica migrações no banco remoto
+npm run db:reset         # Reset completo do banco remoto (cuidado!)
 ```
 
 ### Produção
@@ -168,8 +163,7 @@ Os seguintes arquivos **NÃO DEVEM** ser commitados e estão protegidos pelo `.g
 1. **Nunca exponha suas credenciais** em código fonte
 2. **Use o arquivo `.env.local`** para desenvolvimento local
 3. **Gere um NEXTAUTH_SECRET único** para produção
-4. **A senha do Docker Compose** (`password123`) é apenas para desenvolvimento local
-5. **Em produção**, use serviços gerenciados ou Docker secrets para credenciais
+4. **Em produção**, use serviços gerenciados para credenciais
 
 ## Estrutura do Projeto
 
@@ -225,17 +219,14 @@ public/
 
 ## Scripts Disponíveis
 
-- `npm run dev` - Inicia Docker, banco de dados e servidor de desenvolvimento (SEM migrações automáticas)
-- `npm run dev:migrate` - Desenvolvimento COM aplicação automática de migrações
+- `npm run dev` - Inicia o servidor de desenvolvimento (conecta ao banco remoto)
+- `npm run dev:migrate` - Desenvolvimento COM aplicação automática de migrações no banco remoto
 - `npm run build` - Build para produção
 - `npm start` - Inicia o servidor de produção
-- `npm run docker:start` - Inicia apenas os containers Docker
-- `npm run docker:stop` - Para os containers Docker
-- `npm run docker:logs` - Visualiza logs dos containers
-- `npm run prisma:generate` - Gera o cliente Prisma
+- `npm run prisma:studio` - Abre interface visual do banco remoto
 - `npm run prisma:migrate` - Cria migrações em desenvolvimento
 - `npm run prisma:deploy` - Aplica migrações em produção
-- `npx prisma studio` - Abre interface visual do banco de dados
+- `npm run db:reset` - Reset completo do banco remoto (cuidado!)
 
 ## Funcionalidades Implementadas
 

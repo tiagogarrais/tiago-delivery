@@ -11,7 +11,7 @@ export async function GET(request) {
     if (!slug) {
       return NextResponse.json(
         { error: "Slug é obrigatório" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -20,7 +20,7 @@ export async function GET(request) {
     if (!slugRegex.test(slug)) {
       return NextResponse.json(
         { error: "Slug deve conter apenas letras minúsculas e números" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function GET(request) {
     console.error("Erro ao verificar slug:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
