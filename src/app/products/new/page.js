@@ -15,6 +15,7 @@ function NewProductPageContent() {
   const storeId = searchParams.get("storeId");
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errors, setErrors] = useState([]);
 
@@ -292,25 +293,42 @@ function NewProductPageContent() {
                 <CldUploadWidget
                   uploadPreset="ml_default"
                   options={{
-                    folder: "tiagodelivery",
+                    folder: "tiagodelivery/products",
                   }}
                   onUpload={(result) => {
-                    if (result.event === "success") {
+                    if (result.event === "success" && result.info?.secure_url) {
                       setFormData((prev) => ({
                         ...prev,
                         images: [...prev.images, result.info.secure_url],
                       }));
+                      setImageUploading(false);
                     }
+                  }}
+                  onQueuesEnd={() => {
+                    setImageUploading(false);
                   }}
                 >
                   {({ open }) => {
+                    const handleClick = () => {
+                      setImageUploading(true);
+                      open();
+
+                      // Timeout de segurança
+                      setTimeout(() => {
+                        setImageUploading(false);
+                      }, 30000);
+                    };
+
                     return (
                       <button
                         type="button"
-                        onClick={() => open()}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:bg-gray-50"
+                        onClick={handleClick}
+                        disabled={imageUploading}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        + Adicionar Imagem
+                        {imageUploading
+                          ? "Carregando..."
+                          : "+ Adicionar Imagem"}
                       </button>
                     );
                   }}

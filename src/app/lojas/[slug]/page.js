@@ -518,125 +518,195 @@ export default function LojaPage() {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Produtos</h2>
 
         {products.length === 0 ? (
-          <div className="text-center py-12">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              Nenhum produto disponível
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Esta loja ainda não cadastrou produtos.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+          store.isOwner ? (
+            <div className="text-center py-12">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="aspect-w-1 aspect-h-1 bg-gray-200">
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <svg
-                        className="w-12 h-12 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <Link href={`/products/${product.id}`}>
-                    <h3 className="text-lg font-medium text-gray-900 mb-1 hover:text-blue-600 cursor-pointer">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  {product.description && (
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                      {product.description}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-bold text-gray-900">
-                      {formatPrice(product.price)}
-                    </span>
-                    {store.isOwner ? (
-                      <Link
-                        href={`/products/edit?id=${product.id}&storeId=${store.id}`}
-                        className="bg-purple-600 text-white px-3 py-1 rounded-md hover:bg-purple-700 text-sm"
-                      >
-                        Editar
-                      </Link>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                />
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                Nenhum produto cadastrado ainda
+              </h3>
+              <p className="mt-1 text-sm text-gray-500 mb-6">
+                Comece cadastrando seu primeiro produto
+              </p>
+              <Link
+                href={`/products/new?storeId=${store.id}`}
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                Cadastrar Primeiro Produto
+              </Link>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                />
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                Nenhum produto disponível
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Esta loja ainda não cadastrou produtos.
+              </p>
+            </div>
+          )
+        ) : (
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="aspect-w-1 aspect-h-1 bg-gray-200">
+                    {product.images && product.images.length > 0 ? (
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="w-full h-48 object-cover"
+                      />
                     ) : (
-                      <button
-                        onClick={() => addToCart(product)}
-                        disabled={
-                          addingToCart === product.id ||
-                          !product.available ||
-                          !store.isOpen
-                        }
-                        className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {addingToCart === product.id ? (
-                          <span className="flex items-center">
-                            <svg
-                              className="animate-spin h-4 w-4 mr-1"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                fill="none"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              />
-                            </svg>
-                            ...
-                          </span>
-                        ) : !store.isOpen ? (
-                          "Loja Fechada"
-                        ) : (
-                          "Adicionar"
-                        )}
-                      </button>
+                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <svg
+                          className="w-12 h-12 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
                     )}
                   </div>
+                  <div className="p-4">
+                    <Link href={`/products/${product.id}`}>
+                      <h3 className="text-lg font-medium text-gray-900 mb-1 hover:text-blue-600 cursor-pointer">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    {product.description && (
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                        {product.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-gray-900">
+                        {formatPrice(product.price)}
+                      </span>
+                      {store.isOwner ? (
+                        <Link
+                          href={`/products/edit?id=${product.id}&storeId=${store.id}`}
+                          className="bg-purple-600 text-white px-3 py-1 rounded-md hover:bg-purple-700 text-sm"
+                        >
+                          Editar
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={() => addToCart(product)}
+                          disabled={
+                            addingToCart === product.id ||
+                            !product.available ||
+                            !store.isOpen
+                          }
+                          className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {addingToCart === product.id ? (
+                            <span className="flex items-center">
+                              <svg
+                                className="animate-spin h-4 w-4 mr-1"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                  fill="none"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                              ...
+                            </span>
+                          ) : !store.isOpen ? (
+                            "Loja Fechada"
+                          ) : (
+                            "Adicionar"
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Botão para cadastrar mais produtos */}
+            {store.isOwner && (
+              <div className="mt-12 text-center">
+                <Link
+                  href={`/products/new?storeId=${store.id}`}
+                  className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  Cadastre Mais um Produto
+                </Link>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
