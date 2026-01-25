@@ -335,10 +335,10 @@ function EditProductPageContent() {
                   }}
                   onUpload={(result) => {
                     if (result.event === "success") {
-                      setFormData({
-                        ...formData,
-                        images: [...formData.images, result.info.secure_url],
-                      });
+                      setFormData(prev => ({
+                        ...prev,
+                        images: [...prev.images, result.info.secure_url],
+                      }));
                     }
                   }}
                 >
