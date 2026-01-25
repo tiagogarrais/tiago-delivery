@@ -595,7 +595,7 @@ export default function LojaPage() {
                     <ProductImageCarousel
                       images={product.images}
                       productName={product.name}
-                      className="w-full h-48"
+                      className="w-full"
                     />
                   </div>
                   <div className="p-4">

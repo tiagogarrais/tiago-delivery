@@ -47,7 +47,7 @@ export default function ProductImageCarousel({
   if (!images || images.length <= 1) {
     return (
       <div
-        className={`w-full h-48 bg-gray-200 flex items-center justify-center ${className}`}
+        className={`w-full bg-gray-200 flex items-center justify-center ${className}`}
       >
         {images && images.length > 0 ? (
           <img
@@ -76,7 +76,7 @@ export default function ProductImageCarousel({
 
   return (
     <div
-      className={`relative w-full h-48 bg-gray-200 overflow-hidden ${className}`}
+      className={`relative w-full bg-gray-200 overflow-hidden ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
