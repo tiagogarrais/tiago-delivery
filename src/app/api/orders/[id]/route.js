@@ -58,7 +58,7 @@ export async function PATCH(request, context) {
     if (!order) {
       return NextResponse.json(
         { error: "Pedido não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -73,8 +73,33 @@ export async function PATCH(request, context) {
       console.log("Usuário não é dono da loja");
       return NextResponse.json(
         { error: "Você não tem permissão para atualizar este pedido" },
-        { status: 403 }
+        { status: 403 },
       );
+    }
+
+    // Validar transições de status
+    if (status === "cancelled") {
+      // Não permitir cancelamento de pedidos já finalizados ou cancelados
+      if (order.status === "completed") {
+        return NextResponse.json(
+          { error: "Não é possível cancelar pedidos já finalizados" },
+          { status: 400 },
+        );
+      }
+      if (order.status === "cancelled") {
+        return NextResponse.json(
+          { error: "Este pedido já foi cancelado" },
+          { status: 400 },
+        );
+      }
+    } else {
+      // Não permitir outras alterações em pedidos cancelados
+      if (order.status === "cancelled") {
+        return NextResponse.json(
+          { error: "Não é possível alterar o status de pedidos cancelados" },
+          { status: 400 },
+        );
+      }
     }
 
     // Atualizar status
@@ -91,7 +116,7 @@ export async function PATCH(request, context) {
     console.error("Stack:", error.stack);
     return NextResponse.json(
       { error: "Erro interno do servidor", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

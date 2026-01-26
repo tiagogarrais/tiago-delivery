@@ -18,6 +18,8 @@ export default function MeusPedidosPage() {
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState([]);
   const [updatingOrder, setUpdatingOrder] = useState(null);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState(null);
 
   const statusLabels = {
     pending: { label: "Aguardando Confirmação", color: "yellow" },
@@ -58,6 +60,24 @@ export default function MeusPedidosPage() {
     }
   };
 
+  const handleCancelOrder = (order) => {
+    setOrderToCancel(order);
+    setCancelModalOpen(true);
+  };
+
+  const confirmCancelOrder = async () => {
+    if (!orderToCancel) return;
+
+    await updateOrderStatus(orderToCancel.id, "cancelled");
+    setCancelModalOpen(false);
+    setOrderToCancel(null);
+  };
+
+  const closeCancelModal = () => {
+    setCancelModalOpen(false);
+    setOrderToCancel(null);
+  };
+
   const getAllOrderSteps = (currentStatus) => {
     const steps = [
       { label: "Receber Pedido", status: "confirmed", color: "blue" },
@@ -91,38 +111,51 @@ export default function MeusPedidosPage() {
   };
 
   const getAvailableActions = (status) => {
+    const actions = [];
+
     switch (status) {
       case "pending":
-        return [
-          { label: "Receber Pedido", status: "confirmed", color: "blue" },
-        ];
+        actions.push({
+          label: "Receber Pedido",
+          status: "confirmed",
+          color: "blue",
+        });
+        break;
       case "confirmed":
-        return [
-          {
-            label: "Confirmar forma de pagamento",
-            status: "preparing",
-            color: "purple",
-          },
-        ];
+        actions.push({
+          label: "Confirmar forma de pagamento",
+          status: "preparing",
+          color: "purple",
+        });
+        break;
       case "preparing":
-        return [
-          {
-            label: "Confirmar pedido em Rota de Entrega",
-            status: "delivering",
-            color: "indigo",
-          },
-        ];
+        actions.push({
+          label: "Confirmar pedido em Rota de Entrega",
+          status: "delivering",
+          color: "indigo",
+        });
+        break;
       case "delivering":
-        return [
-          {
-            label: "Finalizar Pedido",
-            status: "completed",
-            color: "green",
-          },
-        ];
+        actions.push({
+          label: "Finalizar Pedido",
+          status: "completed",
+          color: "green",
+        });
+        break;
       default:
-        return [];
+        break;
     }
+
+    // Adicionar botão de cancelar para pedidos que não foram finalizados ou já cancelados
+    if (status !== "completed" && status !== "cancelled") {
+      actions.push({
+        label: "Cancelar Pedido",
+        action: "cancel",
+        color: "red",
+      });
+    }
+
+    return actions;
   };
 
   useEffect(() => {
@@ -274,7 +307,7 @@ export default function MeusPedidosPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-4">
             <p className="text-sm text-gray-600">Total de Pedidos</p>
             <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
@@ -302,6 +335,12 @@ export default function MeusPedidosPage() {
             <p className="text-sm text-gray-600">Concluídos</p>
             <p className="text-2xl font-bold text-green-600">
               {orders.filter((o) => o.status === "completed").length}
+            </p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <p className="text-sm text-gray-600">Cancelados</p>
+            <p className="text-2xl font-bold text-red-600">
+              {orders.filter((o) => o.status === "cancelled").length}
             </p>
           </div>
         </div>
@@ -493,9 +532,11 @@ export default function MeusPedidosPage() {
                       <div className="flex flex-wrap gap-2">
                         {availableActions.map((action) => (
                           <button
-                            key={action.status}
+                            key={action.status || action.action}
                             onClick={() =>
-                              updateOrderStatus(order.id, action.status)
+                              action.action === "cancel"
+                                ? handleCancelOrder(order)
+                                : updateOrderStatus(order.id, action.status)
                             }
                             disabled={isUpdating}
                             className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
@@ -507,7 +548,11 @@ export default function MeusPedidosPage() {
                                     ? "bg-purple-600 text-white hover:bg-purple-700"
                                     : action.color === "indigo"
                                       ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                                      : "bg-green-600 text-white hover:bg-green-700"
+                                      : action.color === "green"
+                                        ? "bg-green-600 text-white hover:bg-green-700"
+                                        : action.color === "red"
+                                          ? "bg-red-600 text-white hover:bg-red-700"
+                                          : "bg-gray-600 text-white hover:bg-gray-700"
                             }`}
                           >
                             {isUpdating ? (
@@ -547,6 +592,88 @@ export default function MeusPedidosPage() {
           </div>
         )}
       </main>
+
+      {/* Modal de Confirmação de Cancelamento */}
+      {cancelModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <svg
+                  className="h-6 w-6 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Confirmar Cancelamento
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Tem certeza que deseja cancelar este pedido?
+                <br />
+                <span className="font-medium text-gray-900">
+                  Cliente: {orderToCancel?.customerName || "Não informado"}
+                </span>
+                <br />
+                <span className="font-medium text-green-600">
+                  Total: {orderToCancel ? formatPrice(orderToCancel.total) : ""}
+                </span>
+              </p>
+              <p className="text-sm text-red-600 mb-6">
+                ⚠️ Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={closeCancelModal}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Não, manter pedido
+                </button>
+                <button
+                  onClick={confirmCancelOrder}
+                  disabled={updatingOrder === orderToCancel?.id}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  {updatingOrder === orderToCancel?.id ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Cancelando...
+                    </span>
+                  ) : (
+                    "Sim, cancelar pedido"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
