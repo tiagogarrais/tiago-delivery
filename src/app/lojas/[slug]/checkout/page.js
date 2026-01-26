@@ -527,7 +527,8 @@ export default function CheckoutPage() {
                       ao entregador
                     </p>
                     <p className="text-sm text-yellow-600 mt-1">
-                      Você receberá {formatPrice(order.changeAmount - order.total)} de troco
+                      Você receberá{" "}
+                      {formatPrice(order.changeAmount - order.total)} de troco
                     </p>
                   </div>
                 )}
@@ -758,7 +759,8 @@ export default function CheckoutPage() {
                     Tenha {formatPrice(order.changeAmount)} preparado
                   </p>
                   <p className="text-sm text-yellow-600 mt-1">
-                    Você receberá {formatPrice(order.changeAmount - order.total)} de troco
+                    Você receberá{" "}
+                    {formatPrice(order.changeAmount - order.total)} de troco
                   </p>
                 </div>
               )}

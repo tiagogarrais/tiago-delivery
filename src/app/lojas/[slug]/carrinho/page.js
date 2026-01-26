@@ -649,7 +649,9 @@ export default function CarrinhoLojaPage() {
                           {formatPrice(parseFloat(item.product.price))} cada
                         </p>
                         <p className="text-xl font-bold text-green-600">
-                          {formatPrice(parseFloat(item.product.price) * item.quantity)}
+                          {formatPrice(
+                            parseFloat(item.product.price) * item.quantity,
+                          )}
                         </p>
                       </div>
                     </div>
@@ -704,7 +706,8 @@ export default function CarrinhoLojaPage() {
                     calculateAmountForFreeShipping() > 0 && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <p className="text-sm text-blue-800">
-                          🚚 Adicione {formatPrice(calculateAmountForFreeShipping())} para
+                          🚚 Adicione{" "}
+                          {formatPrice(calculateAmountForFreeShipping())} para
                           frete grátis!
                         </p>
                       </div>
@@ -723,9 +726,14 @@ export default function CarrinhoLojaPage() {
                     calculateSubtotal() < parseFloat(store.minimumOrder) && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
                         <p className="text-sm text-yellow-800">
-                          ⚠️ Valor mínimo de pedido: {formatPrice(parseFloat(store.minimumOrder))}
+                          ⚠️ Valor mínimo de pedido:{" "}
+                          {formatPrice(parseFloat(store.minimumOrder))}
                           <br />
-                          Faltam: {formatPrice(parseFloat(store.minimumOrder) - calculateSubtotal())}
+                          Faltam:{" "}
+                          {formatPrice(
+                            parseFloat(store.minimumOrder) -
+                              calculateSubtotal(),
+                          )}
                         </p>
                       </div>
                     )}
@@ -874,7 +882,11 @@ export default function CarrinhoLojaPage() {
                                   parseFloat(changeAmount) >
                                     calculateTotal() && (
                                     <p className="mt-1 text-xs text-green-600 font-medium">
-                                      💰 O seu troco é de {formatPrice(parseFloat(changeAmount) - calculateTotal())}
+                                      💰 O seu troco é de{" "}
+                                      {formatPrice(
+                                        parseFloat(changeAmount) -
+                                          calculateTotal(),
+                                      )}
                                     </p>
                                   )}
                               </div>

@@ -376,7 +376,8 @@ export default function MeusPedidosPage() {
                               {item.productName}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Quantidade: {item.quantity} × {formatPrice(item.price)}
+                              Quantidade: {item.quantity} ×{" "}
+                              {formatPrice(item.price)}
                             </p>
                           </div>
                           <p className="font-semibold text-gray-900">
