@@ -7,6 +7,7 @@ import { useState, useEffect, Suspense } from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import { formatPrice } from "../../lib/utils";
+import ProductImageCarousel from "../../components/ProductImageCarousel";
 
 function ProductsPageContent() {
   const { data: session, status } = useSession();
@@ -264,11 +265,13 @@ function ProductsPageContent() {
                   className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                 >
                   {product.images && product.images.length > 0 && (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-48 object-cover"
-                    />
+                    <div className="aspect-w-1 aspect-h-1 bg-gray-200">
+                      <ProductImageCarousel
+                        images={product.images}
+                        productName={product.name}
+                        className="w-full"
+                      />
+                    </div>
                   )}
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">

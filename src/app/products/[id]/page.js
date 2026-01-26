@@ -7,47 +7,7 @@ import Link from "next/link";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import { formatPrice, getStateDisplay } from "../../../lib/utils";
-
-// Componente de Carrossel de Imagens
-function ImageCarousel({ images, alt }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const nextImage = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1,
-    );
-  };
-
-  const prevImage = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1,
-    );
-  };
-
-  if (images.length === 1) {
-    return (
-      <img src={images[0]} alt={alt} className="w-full h-96 object-cover" />
-    );
-  }
-
-  return (
-    <div className="relative w-full h-96">
-      <img
-        src={images[currentIndex]}
-        alt={`${alt} - Imagem ${currentIndex + 1}`}
-        className="w-full h-full object-cover"
-      />
-
-      {/* Setas de navegação */}
-      <button
-        onClick={prevImage}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all"
-      >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+import ProductImageCarousel from "../../../components/ProductImageCarousel";
         >
           <path
             strokeLinecap="round"
@@ -90,8 +50,7 @@ function ImageCarousel({ images, alt }) {
         ))}
       </div>
     </div>
-  );
-}
+import ProductImageCarousel from "../../../components/ProductImageCarousel";
 
 export default function ProductPage() {
   const { data: session } = useSession();
@@ -226,7 +185,13 @@ export default function ProductPage() {
             {/* Product Images Carousel */}
             <div className="md:w-1/2 relative">
               {product.images && product.images.length > 0 ? (
-                <ImageCarousel images={product.images} alt={product.name} />
+                <div className="aspect-w-1 aspect-h-1 bg-gray-200">
+                  <ProductImageCarousel
+                    images={product.images}
+                    productName={product.name}
+                    className="w-full"
+                  />
+                </div>
               ) : (
                 <div className="w-full h-96 bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-500">Sem imagem</span>
