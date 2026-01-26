@@ -274,7 +274,9 @@ export default function LojaPage() {
                     className="w-16 h-16 object-cover rounded-lg border border-gray-200"
                   />
                 )}
-                <h1 className="text-3xl font-bold text-gray-900">{store.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {store.name}
+                </h1>
               </div>
               {store.description && (
                 <p className="text-gray-600 mt-2">{store.description}</p>

@@ -233,3 +233,50 @@ model Order {
   @@index([storeId])
   @@index([status])
 }
+
+model SalesLog {
+  id              String   @id @default(cuid())
+  
+  // Referência ao pedido original (pode ser deletado)
+  orderId         String
+  
+  // Dados do pedido no momento da venda
+  orderStatus     String
+  subtotal        Float
+  deliveryFee     Float
+  total           Float
+  paymentMethod   String?
+  needsChange     Boolean?
+  changeAmount    Float?
+  
+  // Dados completos dos itens vendidos
+  items           Json     // Array de { productId, productName, price, quantity, productDescription }
+  
+  // Dados do cliente no momento da venda
+  customerId      String
+  customerEmail   String
+  customerName    String?
+  customerPhone   String?
+  customerCpf     String?
+  customerWhatsapp String?
+  
+  // Dados da loja no momento da venda
+  storeId         String
+  storeName       String
+  storeEmail      String
+  storePhone      String
+  storeCnpj       String
+  storeCategory   String
+  storeAddress    String   // Endereço completo da loja
+  
+  // Dados de entrega (se houver)
+  deliveryAddress String?  // Endereço de entrega completo
+  
+  // Metadados
+  createdAt       DateTime @default(now())
+  
+  @@index([orderId])
+  @@index([customerId])
+  @@index([storeId])
+  @@index([createdAt])
+}

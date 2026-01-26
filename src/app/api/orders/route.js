@@ -204,6 +204,69 @@ export async function POST(request) {
 
     console.log("Pedido criado com sucesso:", order.id);
 
+    // Buscar dados completos do cliente para o log
+    let customerProfile = null;
+    try {
+      customerProfile = await prisma.usuario.findUnique({
+        where: { userId: session.user.id },
+        include: {
+          addresses: {
+            where: { isPrimary: true },
+            take: 1,
+          },
+        },
+      });
+    } catch (profileError) {
+      console.error("Erro ao buscar perfil do cliente:", profileError);
+    }
+
+    // Montar endereço de entrega
+    let deliveryAddress = null;
+    if (customerProfile?.addresses?.[0]) {
+      const addr = customerProfile.addresses[0];
+      deliveryAddress = `${addr.street}, ${addr.number}${addr.complement ? ` - ${addr.complement}` : ""}, ${addr.neighborhood}, ${addr.city}/${addr.state}, CEP: ${addr.zipCode}`;
+    }
+
+    // Montar endereço da loja
+    const storeAddress = `${store.street}, ${store.number}${store.complement ? ` - ${store.complement}` : ""}, ${store.neighborhood}, ${store.city}/${store.state}, CEP: ${store.zipCode}`;
+
+    // Criar log de venda com todos os dados
+    try {
+      console.log("Criando log de venda...");
+      await prisma.salesLog.create({
+        data: {
+          orderId: order.id,
+          orderStatus: order.status,
+          subtotal: order.subtotal,
+          deliveryFee: order.deliveryFee,
+          total: order.total,
+          paymentMethod: order.paymentMethod,
+          needsChange: order.needsChange,
+          changeAmount: order.changeAmount,
+          items: items,
+          customerId: session.user.id,
+          customerEmail: session.user.email,
+          customerName:
+            customerName || session.user.name || customerProfile?.fullName,
+          customerPhone: customerPhone || customerProfile?.whatsapp,
+          customerCpf: customerProfile?.cpf,
+          customerWhatsapp: customerProfile?.whatsapp,
+          storeId: store.id,
+          storeName: store.name,
+          storeEmail: store.email,
+          storePhone: store.phone,
+          storeCnpj: store.cnpj,
+          storeCategory: store.category,
+          storeAddress: storeAddress,
+          deliveryAddress: deliveryAddress,
+        },
+      });
+      console.log("Log de venda criado com sucesso");
+    } catch (logError) {
+      console.error("Erro ao criar log de venda:", logError);
+      // Não falhar o pedido se o log falhar
+    }
+
     // Enviar notificação por email para a loja
     try {
       console.log("Enviando notificação por email para a loja...");
