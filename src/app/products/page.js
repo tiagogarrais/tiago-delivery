@@ -162,15 +162,26 @@ function ProductsPageContent() {
         {/* Store Info */}
         {store && (
           <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {store.name}
-            </h2>
-            {store.description && (
-              <p className="text-gray-600">{store.description}</p>
-            )}
-            <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-              {store.category}
-            </span>
+            <div className="flex items-center space-x-4">
+              {store.image && (
+                <img
+                  src={store.image}
+                  alt={`Logo da ${store.name}`}
+                  className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                />
+              )}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  {store.name}
+                </h2>
+                {store.description && (
+                  <p className="text-gray-600">{store.description}</p>
+                )}
+                <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                  {store.category}
+                </span>
+              </div>
+            </div>
           </div>
         )}
 

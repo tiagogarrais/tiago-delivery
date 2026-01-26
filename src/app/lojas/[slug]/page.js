@@ -266,7 +266,16 @@ export default function LojaPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col items-center">
             <div className="flex-1 text-center">
-              <h1 className="text-3xl font-bold text-gray-900">{store.name}</h1>
+              <div className="flex items-center justify-center space-x-4 mb-4">
+                {store.image && (
+                  <img
+                    src={store.image}
+                    alt={`Logo da ${store.name}`}
+                    className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                  />
+                )}
+                <h1 className="text-3xl font-bold text-gray-900">{store.name}</h1>
+              </div>
               {store.description && (
                 <p className="text-gray-600 mt-2">{store.description}</p>
               )}
