@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { sendOrderNotificationToStore } from "@/lib/email";
 
 // GET - Listar pedidos (cliente vê suas compras, loja vê seus pedidos)
 export async function GET(request) {
@@ -202,6 +203,29 @@ export async function POST(request) {
     });
 
     console.log("Pedido criado com sucesso:", order.id);
+
+    // Enviar notificação por email para a loja
+    try {
+      console.log("Enviando notificação por email para a loja...");
+
+      if (store.email) {
+        await sendOrderNotificationToStore({
+          storeEmail: store.email,
+          storeName: store.name,
+          order,
+          customerName: customerName || session.user.name || "Cliente",
+        });
+        console.log(
+          "Notificação por email enviada com sucesso para:",
+          store.email,
+        );
+      } else {
+        console.log("Email da loja não encontrado no cadastro");
+      }
+    } catch (emailError) {
+      console.error("Erro ao enviar email de notificação:", emailError);
+      // Não falhar se não conseguir enviar o email
+    }
 
     // Limpar carrinho do usuário para esta loja
     try {
