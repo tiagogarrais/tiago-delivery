@@ -7,6 +7,7 @@ import Link from "next/link";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import ProductImageCarousel from "../../../components/ProductImageCarousel";
+import { formatPrice, getStateDisplay } from "../../../lib/utils";
 
 export default function LojaPage() {
   const { data: session } = useSession();
@@ -180,13 +181,6 @@ export default function LojaPage() {
     } finally {
       setAddingToCart(null);
     }
-  };
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(price);
   };
 
   const toggleStoreStatus = async () => {

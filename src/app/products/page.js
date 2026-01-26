@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import { formatPrice } from "../../lib/utils";
 
 function ProductsPageContent() {
   const { data: session, status } = useSession();
@@ -280,7 +281,7 @@ function ProductsPageContent() {
                     )}
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-xl font-bold text-green-600">
-                        R$ {parseFloat(product.price).toFixed(2)}
+                        {formatPrice(parseFloat(product.price))}
                       </span>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${

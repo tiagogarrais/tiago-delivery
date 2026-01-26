@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Footer from "../../../../components/Footer";
+import { formatPrice } from "../../../../lib/utils";
 
 export default function CheckoutPage() {
   const { data: session } = useSession();
@@ -196,7 +197,7 @@ export default function CheckoutPage() {
     const message = encodeURIComponent(
       `Olá! Acabei de realizar o pagamento do meu pedido na ${
         store?.name
-      }.\n\nValor: R$ ${calculateTotal().toFixed(2)}\n\nSegue o comprovante:`,
+      }.\n\nValor: ${formatPrice(calculateTotal())}\n\nSegue o comprovante:`,
     );
     return `https://wa.me/${whatsappNumber}?text=${message}`;
   };
@@ -521,13 +522,12 @@ export default function CheckoutPage() {
                     <p className="text-yellow-700">
                       Entregue{" "}
                       <span className="font-bold">
-                        R$ {order.changeAmount.toFixed(2)}
+                        {formatPrice(order.changeAmount)}
                       </span>{" "}
                       ao entregador
                     </p>
                     <p className="text-sm text-yellow-600 mt-1">
-                      Você receberá R${" "}
-                      {(order.changeAmount - order.total).toFixed(2)} de troco
+                      Você receberá {formatPrice(order.changeAmount - order.total)} de troco
                     </p>
                   </div>
                 )}
@@ -535,7 +535,7 @@ export default function CheckoutPage() {
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                     <p className="font-medium text-green-800">✅ Valor justo</p>
                     <p className="text-green-700 text-sm">
-                      Entregue exatamente R$ {order.total.toFixed(2)}
+                      Entregue exatamente {formatPrice(order.total)}
                     </p>
                   </div>
                 )}
@@ -599,11 +599,10 @@ export default function CheckoutPage() {
                     <div className="mt-2 text-sm">
                       <span className="text-gray-600">Troco para: </span>
                       <span className="font-medium text-green-600">
-                        R$ {order.changeAmount.toFixed(2)}
+                        {formatPrice(order.changeAmount)}
                       </span>
                       <span className="ml-2 text-xs text-gray-500">
-                        (Troco: R${" "}
-                        {(order.changeAmount - order.total).toFixed(2)})
+                        (Troco: {formatPrice(order.changeAmount - order.total)})
                       </span>
                     </div>
                   )}
@@ -629,11 +628,11 @@ export default function CheckoutPage() {
                     {item.productName}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {item.quantity}x R$ {item.price.toFixed(2)}
+                    {item.quantity}x {formatPrice(item.price)}
                   </p>
                 </div>
                 <p className="font-semibold text-gray-900">
-                  R$ {(item.price * item.quantity).toFixed(2)}
+                  {formatPrice(item.price * item.quantity)}
                 </p>
               </div>
             ))}
@@ -643,17 +642,17 @@ export default function CheckoutPage() {
           <div className="space-y-2 pt-4 border-t-2 border-gray-300">
             <div className="flex justify-between text-gray-700">
               <span>Subtotal:</span>
-              <span>R$ {calculateSubtotal().toFixed(2)}</span>
+              <span>{formatPrice(calculateSubtotal())}</span>
             </div>
             {order?.deliveryFee > 0 && (
               <div className="flex justify-between text-gray-700">
                 <span>Taxa de entrega:</span>
-                <span>R$ {order.deliveryFee.toFixed(2)}</span>
+                <span>{formatPrice(order.deliveryFee)}</span>
               </div>
             )}
             <div className="flex justify-between text-2xl font-bold text-green-600 pt-2">
               <span>Total a Pagar:</span>
-              <span>R$ {calculateTotal().toFixed(2)}</span>
+              <span>{formatPrice(calculateTotal())}</span>
             </div>
           </div>
         </div>
@@ -756,11 +755,10 @@ export default function CheckoutPage() {
                     💰 Troco necessário
                   </p>
                   <p className="text-yellow-700">
-                    Tenha R$ {order.changeAmount.toFixed(2)} preparado
+                    Tenha {formatPrice(order.changeAmount)} preparado
                   </p>
                   <p className="text-sm text-yellow-600 mt-1">
-                    Você receberá R${" "}
-                    {(order.changeAmount - order.total).toFixed(2)} de troco
+                    Você receberá {formatPrice(order.changeAmount - order.total)} de troco
                   </p>
                 </div>
               )}
@@ -828,7 +826,7 @@ export default function CheckoutPage() {
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <span>
-                      Tenha R$ {order.changeAmount.toFixed(2)} para pagar
+                      Tenha {formatPrice(order.changeAmount)} para pagar
                       (incluindo troco)
                     </span>
                   </li>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Footer from "../../../../components/Footer";
+import { formatPrice } from "../../../../lib/utils";
 
 export default function MeusPedidosPage() {
   const { data: session } = useSession();
@@ -375,12 +376,11 @@ export default function MeusPedidosPage() {
                               {item.productName}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Quantidade: {item.quantity} × R${" "}
-                              {item.price.toFixed(2)}
+                              Quantidade: {item.quantity} × {formatPrice(item.price)}
                             </p>
                           </div>
                           <p className="font-semibold text-gray-900">
-                            R$ {(item.price * item.quantity).toFixed(2)}
+                            {formatPrice(item.price * item.quantity)}
                           </p>
                         </div>
                       ))}
@@ -392,18 +392,18 @@ export default function MeusPedidosPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-gray-700">
                         <span>Subtotal:</span>
-                        <span>R$ {order.subtotal.toFixed(2)}</span>
+                        <span>{formatPrice(order.subtotal)}</span>
                       </div>
                       {order.deliveryFee > 0 && (
                         <div className="flex justify-between text-gray-700">
                           <span>Taxa de entrega:</span>
-                          <span>R$ {order.deliveryFee.toFixed(2)}</span>
+                          <span>{formatPrice(order.deliveryFee)}</span>
                         </div>
                       )}
                       <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-300">
                         <span>Total:</span>
                         <span className="text-green-600">
-                          R$ {order.total.toFixed(2)}
+                          {formatPrice(order.total)}
                         </span>
                       </div>
                     </div>

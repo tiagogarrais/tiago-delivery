@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
+import { formatPrice, getStateDisplay } from "../../../lib/utils";
 
 // Componente de Carrossel de Imagens
 function ImageCarousel({ images, alt }) {
@@ -104,54 +105,6 @@ export default function ProductPage() {
   const [error, setError] = useState(null);
   const [addingToCart, setAddingToCart] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-
-  // Mapeamento de códigos numéricos para siglas de UF
-  const stateCodeToUF = {
-    11: "RO",
-    12: "AC",
-    13: "AM",
-    14: "RR",
-    15: "PA",
-    16: "AP",
-    17: "TO",
-    21: "MA",
-    22: "PI",
-    23: "CE",
-    24: "RN",
-    25: "PB",
-    26: "PE",
-    27: "AL",
-    28: "SE",
-    29: "BA",
-    31: "MG",
-    32: "ES",
-    33: "RJ",
-    35: "SP",
-    41: "PR",
-    42: "SC",
-    43: "RS",
-    50: "MS",
-    51: "MT",
-    52: "GO",
-    53: "DF",
-  };
-
-  const getStateDisplay = (state) => {
-    if (!state) return "";
-    // Se já é uma sigla (2 letras), retorna em maiúsculas
-    if (state.length === 2 && isNaN(state)) {
-      return state.toUpperCase();
-    }
-    // Se é código numérico, converte para sigla
-    return stateCodeToUF[state] || state;
-  };
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(price);
-  };
 
   // Carregar dados do produto
   useEffect(() => {

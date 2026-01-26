@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Header from "../../../../components/Header";
 import Footer from "../../../../components/Footer";
+import { formatPrice } from "../../../../lib/utils";
 
 export default function CarrinhoLojaPage() {
   const { data: session } = useSession();
@@ -285,7 +286,7 @@ export default function CarrinhoLojaPage() {
 
         if (changeValue < total) {
           setErrors([
-            `O valor informado (R$ ${changeValue.toFixed(2)}) é menor que o total do pedido (R$ ${total.toFixed(2)}). Por favor, informe um valor suficiente para cobrir o pedido e o troco.`,
+            `O valor informado (${formatPrice(changeValue)}) é menor que o total do pedido (${formatPrice(total)}). Por favor, informe um valor suficiente para cobrir o pedido e o troco.`,
           ]);
           setCreatingOrder(false);
           return;
@@ -486,7 +487,7 @@ export default function CarrinhoLojaPage() {
                     <div>
                       <span className="font-medium">Pedido mínimo:</span>{" "}
                       <span className="text-green-600 font-semibold">
-                        R$ {parseFloat(store.minimumOrder).toFixed(2)}
+                        {formatPrice(parseFloat(store.minimumOrder))}
                       </span>
                     </div>
                   )}
@@ -497,7 +498,7 @@ export default function CarrinhoLojaPage() {
                         <span className="text-green-600 font-semibold">
                           {store.deliveryFee === 0
                             ? "Grátis"
-                            : `R$ ${parseFloat(store.deliveryFee).toFixed(2)}`}
+                            : formatPrice(parseFloat(store.deliveryFee))}
                         </span>
                       </div>
                     )}
@@ -508,8 +509,7 @@ export default function CarrinhoLojaPage() {
                           Frete grátis acima de:
                         </span>{" "}
                         <span className="text-blue-600 font-semibold">
-                          R${" "}
-                          {parseFloat(store.freeShippingThreshold).toFixed(2)}
+                          {formatPrice(parseFloat(store.freeShippingThreshold))}
                         </span>
                       </div>
                     )}
@@ -646,13 +646,10 @@ export default function CarrinhoLojaPage() {
                       {/* Price */}
                       <div className="text-center">
                         <p className="text-sm text-gray-600">
-                          R$ {parseFloat(item.product.price).toFixed(2)} cada
+                          {formatPrice(parseFloat(item.product.price))} cada
                         </p>
                         <p className="text-xl font-bold text-green-600">
-                          R${" "}
-                          {(
-                            parseFloat(item.product.price) * item.quantity
-                          ).toFixed(2)}
+                          {formatPrice(parseFloat(item.product.price) * item.quantity)}
                         </p>
                       </div>
                     </div>
@@ -683,13 +680,13 @@ export default function CarrinhoLojaPage() {
                       Subtotal ({cart.items.length}{" "}
                       {cart.items.length === 1 ? "item" : "itens"})
                     </span>
-                    <span>R$ {calculateSubtotal().toFixed(2)}</span>
+                    <span>{formatPrice(calculateSubtotal())}</span>
                   </div>
 
                   {calculateDeliveryFee() > 0 && (
                     <div className="flex justify-between text-gray-600">
                       <span>Taxa de Entrega</span>
-                      <span>R$ {calculateDeliveryFee().toFixed(2)}</span>
+                      <span>{formatPrice(calculateDeliveryFee())}</span>
                     </div>
                   )}
                   {calculateDeliveryFee() === 0 &&
@@ -707,8 +704,7 @@ export default function CarrinhoLojaPage() {
                     calculateAmountForFreeShipping() > 0 && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <p className="text-sm text-blue-800">
-                          🚚 Adicione R${" "}
-                          {calculateAmountForFreeShipping().toFixed(2)} para
+                          🚚 Adicione {formatPrice(calculateAmountForFreeShipping())} para
                           frete grátis!
                         </p>
                       </div>
@@ -718,7 +714,7 @@ export default function CarrinhoLojaPage() {
                     <div className="flex justify-between text-lg font-bold text-gray-900">
                       <span>Total</span>
                       <span className="text-green-600">
-                        R$ {calculateTotal().toFixed(2)}
+                        {formatPrice(calculateTotal())}
                       </span>
                     </div>
                   </div>
@@ -727,13 +723,9 @@ export default function CarrinhoLojaPage() {
                     calculateSubtotal() < parseFloat(store.minimumOrder) && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
                         <p className="text-sm text-yellow-800">
-                          ⚠️ Valor mínimo de pedido: R${" "}
-                          {parseFloat(store.minimumOrder).toFixed(2)}
+                          ⚠️ Valor mínimo de pedido: {formatPrice(parseFloat(store.minimumOrder))}
                           <br />
-                          Faltam: R${" "}
-                          {(
-                            parseFloat(store.minimumOrder) - calculateSubtotal()
-                          ).toFixed(2)}
+                          Faltam: {formatPrice(parseFloat(store.minimumOrder) - calculateSubtotal())}
                         </p>
                       </div>
                     )}
@@ -868,13 +860,13 @@ export default function CarrinhoLojaPage() {
                                   </span>
                                   <input
                                     type="number"
-                                    min={calculateTotal().toFixed(2)}
+                                    min={calculateTotal()}
                                     step="0.01"
                                     value={changeAmount}
                                     onChange={(e) =>
                                       setChangeAmount(e.target.value)
                                     }
-                                    placeholder={`Mínimo ${calculateTotal().toFixed(2)}`}
+                                    placeholder={`Mínimo ${formatPrice(calculateTotal())}`}
                                     className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                   />
                                 </div>
@@ -882,11 +874,7 @@ export default function CarrinhoLojaPage() {
                                   parseFloat(changeAmount) >
                                     calculateTotal() && (
                                     <p className="mt-1 text-xs text-green-600 font-medium">
-                                      💰 O seu troco é de R${" "}
-                                      {(
-                                        parseFloat(changeAmount) -
-                                        calculateTotal()
-                                      ).toFixed(2)}
+                                      💰 O seu troco é de {formatPrice(parseFloat(changeAmount) - calculateTotal())}
                                     </p>
                                   )}
                               </div>

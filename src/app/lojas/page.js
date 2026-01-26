@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import { formatPrice } from "../../lib/utils";
 
 function LojasContent() {
   const { data: session, status } = useSession();
@@ -198,7 +199,7 @@ function LojasContent() {
                       <div className="flex items-center">
                         <span className="mr-2">💰</span>
                         <span>
-                          Pedido mínimo: R$ {store.minimumOrder.toFixed(2)}
+                          Pedido mínimo: {formatPrice(store.minimumOrder)}
                         </span>
                       </div>
                     )}
@@ -211,7 +212,7 @@ function LojasContent() {
                             Taxa de entrega:{" "}
                             {store.deliveryFee === 0
                               ? "Grátis"
-                              : `R$ ${store.deliveryFee.toFixed(2)}`}
+                              : formatPrice(store.deliveryFee)}
                           </span>
                         </div>
                       )}
