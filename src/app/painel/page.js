@@ -952,34 +952,60 @@ function ProfileContent() {
                   {stores.map((store) => (
                     <div
                       key={store.id}
-                      className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                      className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-lg transition-shadow"
                     >
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-start space-x-4">
+                      {/* Header: Imagem + Info + Botão Editar */}
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+                        <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                           {store.image && (
                             <img
                               src={store.image}
                               alt={`Imagem da loja ${store.name}`}
-                              className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                              className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-lg border border-gray-200 flex-shrink-0"
                             />
                           )}
-                          <div>
-                            <h3 className="text-xl font-semibold text-gray-900">
-                              {store.name}
-                            </h3>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+                                {store.name}
+                              </h3>
+                              {/* Botão Editar Mobile - ícone apenas */}
+                              <button
+                                onClick={() =>
+                                  router.push(`/store?id=${store.id}`)
+                                }
+                                className="sm:hidden p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
+                                title="Editar loja"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
                             {store.description && (
-                              <p className="text-gray-600 mt-1">
+                              <p className="text-gray-600 mt-1 text-sm sm:text-base line-clamp-2">
                                 {store.description}
                               </p>
                             )}
-                            <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                            <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-xs sm:text-sm rounded-full">
                               {store.category}
                             </span>
                           </div>
                         </div>
+                        {/* Botão Editar Desktop */}
                         <button
                           onClick={() => router.push(`/store?id=${store.id}`)}
-                          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          className="hidden sm:flex items-center space-x-2 px-4 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex-shrink-0"
                         >
                           <svg
                             className="w-4 h-4"
