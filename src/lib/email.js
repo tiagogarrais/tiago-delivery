@@ -27,15 +27,6 @@ export async function sendOrderNotificationToStore({
   order,
   customerName,
 }) {
-  const transporter = nodemailer.createTransporter({
-    host: process.env.EMAIL_SERVER_HOST,
-    port: process.env.EMAIL_SERVER_PORT,
-    auth: {
-      user: process.env.EMAIL_SERVER_USER,
-      pass: process.env.EMAIL_SERVER_PASSWORD,
-    },
-  });
-
   const formatPrice = (price) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -67,6 +58,21 @@ export async function sendOrderNotificationToStore({
         <p><strong>Data:</strong> ${new Date(order.createdAt).toLocaleString("pt-BR")}</p>
         <p><strong>Pagamento:</strong> ${order.paymentMethod === "pix" ? "PIX" : order.paymentMethod === "cash" ? "Dinheiro" : order.paymentMethod}</p>
         ${order.needsChange ? `<p><strong>Troco para:</strong> ${formatPrice(order.changeAmount)}</p>` : ""}
+        <p><strong>Tipo de Entrega:</strong> ${order.deliveryType === "pickup" ? "🏪 Retirada na Loja" : "🚚 Entrega em Domicílio"}</p>
+        ${
+          order.deliveryType === "delivery" && order.deliveryAddress
+            ? `
+        <p><strong>Endereço de Entrega:</strong></p>
+        <p style="margin-left: 20px; margin-top: 5px;">
+          ${order.deliveryAddress.street}, ${order.deliveryAddress.number}${order.deliveryAddress.complement ? ` - ${order.deliveryAddress.complement}` : ""}<br>
+          ${order.deliveryAddress.neighborhood}<br>
+          ${order.deliveryAddress.city}, ${order.deliveryAddress.state}<br>
+          ${order.deliveryAddress.zipCode ? `CEP: ${order.deliveryAddress.zipCode}<br>` : ""}
+          ${order.deliveryAddress.reference ? `Referência: ${order.deliveryAddress.reference}` : ""}
+        </p>
+        `
+            : ""
+        }
       </div>
 
       <div style="margin: 20px 0;">
@@ -127,6 +133,19 @@ export async function sendOrderNotificationToStore({
     Data: ${new Date(order.createdAt).toLocaleString("pt-BR")}
     Pagamento: ${order.paymentMethod === "pix" ? "PIX" : order.paymentMethod === "cash" ? "Dinheiro" : order.paymentMethod}
     ${order.needsChange ? `Troco para: ${formatPrice(order.changeAmount)}\n` : ""}
+    Tipo de Entrega: ${order.deliveryType === "pickup" ? "Retirada na Loja" : "Entrega em Domicílio"}
+    ${
+      order.deliveryType === "delivery" && order.deliveryAddress
+        ? `
+    Endereço de Entrega:
+    ${order.deliveryAddress.street}, ${order.deliveryAddress.number}${order.deliveryAddress.complement ? ` - ${order.deliveryAddress.complement}` : ""}
+    ${order.deliveryAddress.neighborhood}
+    ${order.deliveryAddress.city}, ${order.deliveryAddress.state}
+    ${order.deliveryAddress.zipCode ? `CEP: ${order.deliveryAddress.zipCode}` : ""}
+    ${order.deliveryAddress.reference ? `Referência: ${order.deliveryAddress.reference}` : ""}
+    `
+        : ""
+    }
     
     Itens do Pedido:
     ${order.items.map((item) => `- ${item.productName} (${item.quantity}x) - ${formatPrice(item.price * item.quantity)}`).join("\n    ")}

@@ -142,6 +142,8 @@ export async function POST(request) {
       paymentMethod,
       needsChange,
       changeAmount,
+      deliveryType,
+      deliveryAddress,
     } = body;
 
     const errors = [];
@@ -199,6 +201,8 @@ export async function POST(request) {
         paymentMethod,
         needsChange: needsChange || false,
         changeAmount: needsChange ? changeAmount : null,
+        deliveryType: deliveryType || "delivery",
+        deliveryAddress: deliveryType === "delivery" ? deliveryAddress : null,
       },
     });
 
@@ -221,10 +225,10 @@ export async function POST(request) {
     }
 
     // Montar endereço de entrega
-    let deliveryAddress = null;
+    let formattedDeliveryAddress = null;
     if (customerProfile?.addresses?.[0]) {
       const addr = customerProfile.addresses[0];
-      deliveryAddress = `${addr.street}, ${addr.number}${addr.complement ? ` - ${addr.complement}` : ""}, ${addr.neighborhood}, ${addr.city}/${addr.state}, CEP: ${addr.zipCode}`;
+      formattedDeliveryAddress = `${addr.street}, ${addr.number}${addr.complement ? ` - ${addr.complement}` : ""}, ${addr.neighborhood}, ${addr.city}/${addr.state}, CEP: ${addr.zipCode}`;
     }
 
     // Montar endereço da loja
@@ -258,7 +262,7 @@ export async function POST(request) {
           storeCnpj: store.cnpj,
           storeCategory: store.category,
           storeAddress: storeAddress,
-          deliveryAddress: deliveryAddress,
+          deliveryAddress: formattedDeliveryAddress,
         },
       });
       console.log("Log de venda criado com sucesso");

@@ -211,6 +211,10 @@ model Order {
   total        Float
   status       String   @default("pending") // pending, confirmed, preparing, delivering, completed, cancelled
   
+  // Informações de entrega
+  deliveryType  String?  @default("delivery") // delivery, pickup
+  deliveryAddress Json?  // Dados do endereço de entrega selecionado
+  
   // Informações de pagamento
   paymentMethod String? // pix, credit, debit, cash
   needsChange   Boolean? @default(false) // se precisa de troco (apenas para cash)

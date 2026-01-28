@@ -25,6 +25,9 @@ export default function CarrinhoLojaPage() {
   const [paymentMethod, setPaymentMethod] = useState("pix"); // pix, credit, debit, cash
   const [changeAmount, setChangeAmount] = useState("");
   const [needsChange, setNeedsChange] = useState(false); // Controla se precisa de troco
+  const [deliveryType, setDeliveryType] = useState("delivery"); // delivery or pickup
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [userAddresses, setUserAddresses] = useState([]);
 
   // Mapeamento de códigos numéricos para siglas de UF
   const stateCodeToUF = {
@@ -101,6 +104,13 @@ export default function CarrinhoLojaPage() {
     }
   }, [store]);
 
+  // Buscar endereços quando o usuário estiver logado
+  useEffect(() => {
+    if (session?.user) {
+      fetchUserAddresses();
+    }
+  }, [session]);
+
   const fetchCart = async () => {
     try {
       setLoading(true);
@@ -119,6 +129,24 @@ export default function CarrinhoLojaPage() {
       setErrors(["Erro ao carregar carrinho"]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserAddresses = async () => {
+    if (!session?.user) return;
+
+    try {
+      const response = await fetch("/api/addresses");
+      if (response.ok) {
+        const data = await response.json();
+        setUserAddresses(data.addresses || []);
+        // Selecionar o primeiro endereço como padrão se houver
+        if (data.addresses && data.addresses.length > 0 && !selectedAddress) {
+          setSelectedAddress(data.addresses[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao buscar endereços:", error);
     }
   };
 
@@ -221,6 +249,11 @@ export default function CarrinhoLojaPage() {
   };
 
   const calculateDeliveryFee = () => {
+    // Se for retirada na loja, não há taxa de entrega
+    if (deliveryType === "pickup") {
+      return 0;
+    }
+
     if (!store?.deliveryFee) {
       return 0;
     }
@@ -293,6 +326,13 @@ export default function CarrinhoLojaPage() {
         }
       }
 
+      // Validar tipo de entrega e endereço
+      if (deliveryType === "delivery" && !selectedAddress) {
+        setErrors(["Por favor, selecione um endereço para entrega."]);
+        setCreatingOrder(false);
+        return;
+      }
+
       // Preparar dados do pedido
       const orderItems = cart.items.map((item) => ({
         productId: item.product.id,
@@ -316,6 +356,8 @@ export default function CarrinhoLojaPage() {
         paymentMethod,
         needsChange,
         changeAmount: needsChange ? parseFloat(changeAmount) : null,
+        deliveryType,
+        deliveryAddress: deliveryType === "delivery" ? selectedAddress : null,
       };
 
       const response = await fetch("/api/orders", {
@@ -737,6 +779,113 @@ export default function CarrinhoLojaPage() {
                         </p>
                       </div>
                     )}
+                </div>
+
+                {/* Delivery Type Selection */}
+                <div className="border-t pt-4">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Tipo de Entrega
+                  </h4>
+
+                  <div className="space-y-3">
+                    {/* Delivery */}
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="deliveryType"
+                        value="delivery"
+                        checked={deliveryType === "delivery"}
+                        onChange={(e) => setDeliveryType(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-3 text-sm font-medium text-gray-700">
+                        🚚 Entrega em domicílio
+                      </span>
+                    </label>
+
+                    {/* Pickup */}
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="deliveryType"
+                        value="pickup"
+                        checked={deliveryType === "pickup"}
+                        onChange={(e) => setDeliveryType(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-3 text-sm font-medium text-gray-700">
+                        🏪 Retirada na loja
+                      </span>
+                      <span className="ml-2 text-xs text-green-600 font-medium">
+                        (Sem taxa de entrega)
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Address Selection - Only show if delivery is selected */}
+                  {deliveryType === "delivery" && (
+                    <div className="mt-4">
+                      <h5 className="text-sm font-medium text-gray-900 mb-2">
+                        Endereço de Entrega
+                      </h5>
+
+                      {userAddresses.length === 0 ? (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <p className="text-sm text-yellow-800 mb-2">
+                            Você ainda não cadastrou nenhum endereço.
+                          </p>
+                          <Link
+                            href="/painel/addresses"
+                            className="inline-block bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700 transition-colors"
+                          >
+                            Cadastrar Endereço
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {userAddresses.map((address) => (
+                            <label
+                              key={address.id}
+                              className="flex items-start"
+                            >
+                              <input
+                                type="radio"
+                                name="selectedAddress"
+                                value={address.id}
+                                checked={selectedAddress?.id === address.id}
+                                onChange={() => setSelectedAddress(address)}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 mt-0.5"
+                              />
+                              <div className="ml-3 flex-1">
+                                <div className="text-sm text-gray-900">
+                                  {address.street}, {address.number}
+                                  {address.complement &&
+                                    ` - ${address.complement}`}
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  {address.neighborhood}, {address.city} -{" "}
+                                  {getStateDisplay(address.state)}
+                                </div>
+                                {address.reference && (
+                                  <div className="text-xs text-gray-500">
+                                    Referência: {address.reference}
+                                  </div>
+                                )}
+                              </div>
+                            </label>
+                          ))}
+                          <div className="pt-2 border-t">
+                            <Link
+                              href="/painel/addresses"
+                              className="text-sm text-blue-600 hover:text-blue-700"
+                            >
+                              + Adicionar novo endereço
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Payment Options */}

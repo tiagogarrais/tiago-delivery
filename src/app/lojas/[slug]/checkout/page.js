@@ -392,7 +392,7 @@ export default function CheckoutPage() {
                   <p className="text-sm text-gray-600 mb-2">Chave PIX:</p>
                   <div className="flex items-center space-x-2">
                     <div className="flex-1 bg-gray-100 p-4 rounded-lg font-mono text-gray-900 break-all">
-                      {formatPixKey(pixKey?.key, pixKey?.type) || pixKey?.key}
+                      {pixKey?.key?.replace(/\D/g, "")}
                     </div>
                     <button
                       onClick={copyPixKey}
@@ -544,6 +544,116 @@ export default function CheckoutPage() {
             </div>
           </div>
         )}
+
+        {/* Customer and Delivery Info */}
+        <div className="bg-white rounded-xl p-6 shadow-md mb-6">
+          <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+            <span className="text-2xl mr-2">👤</span>
+            Informações do Cliente e Entrega
+          </h3>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Customer Info */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900">Dados do Cliente</h4>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <span className="font-medium text-gray-600">Nome:</span>{" "}
+                  <span className="text-gray-900">
+                    {order?.customerName ||
+                      session?.user?.name ||
+                      "Não informado"}
+                  </span>
+                </p>
+                {order?.customerPhone && (
+                  <p>
+                    <span className="font-medium text-gray-600">Telefone:</span>{" "}
+                    <span className="text-gray-900">{order.customerPhone}</span>
+                  </p>
+                )}
+                <p>
+                  <span className="font-medium text-gray-600">
+                    Tipo de Entrega:
+                  </span>{" "}
+                  <span className="text-gray-900">
+                    {order?.deliveryType === "pickup"
+                      ? "🏪 Retirada na Loja"
+                      : "🚚 Entrega em Domicílio"}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Delivery Address */}
+            {order?.deliveryType === "delivery" && order?.deliveryAddress && (
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-900">
+                  Endereço de Entrega
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <p>
+                    <span className="font-medium text-gray-600">Endereço:</span>{" "}
+                    <span className="text-gray-900">
+                      {order.deliveryAddress.street},{" "}
+                      {order.deliveryAddress.number}
+                      {order.deliveryAddress.complement &&
+                        ` - ${order.deliveryAddress.complement}`}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="font-medium text-gray-600">Bairro:</span>{" "}
+                    <span className="text-gray-900">
+                      {order.deliveryAddress.neighborhood}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="font-medium text-gray-600">
+                      Cidade/UF:
+                    </span>{" "}
+                    <span className="text-gray-900">
+                      {order.deliveryAddress.city},{" "}
+                      {getStateDisplay(order.deliveryAddress.state)}
+                    </span>
+                  </p>
+                  {order.deliveryAddress.zipCode && (
+                    <p>
+                      <span className="font-medium text-gray-600">CEP:</span>{" "}
+                      <span className="text-gray-900">
+                        {order.deliveryAddress.zipCode}
+                      </span>
+                    </p>
+                  )}
+                  {order.deliveryAddress.reference && (
+                    <p>
+                      <span className="font-medium text-gray-600">
+                        Referência:
+                      </span>{" "}
+                      <span className="text-gray-900">
+                        {order.deliveryAddress.reference}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Pickup Info */}
+            {order?.deliveryType === "pickup" && (
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-900">Retirada na Loja</h4>
+                <div className="space-y-2 text-sm">
+                  <p className="text-gray-600">
+                    Você poderá retirar seu pedido diretamente na loja nos
+                    horários de funcionamento.
+                  </p>
+                  <p className="text-gray-600">
+                    Leve este comprovante ou informe o número do pedido.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Order Summary */}
         <div className="bg-white rounded-xl p-6 shadow-md">

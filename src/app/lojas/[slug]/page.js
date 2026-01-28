@@ -23,6 +23,7 @@ export default function LojaPage() {
   const [addingToCart, setAddingToCart] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [togglingStore, setTogglingStore] = useState(false);
+  const [showFloatingCart, setShowFloatingCart] = useState(false);
 
   // Mapeamento de códigos numéricos para siglas de UF
   const stateCodeToUF = {
@@ -133,6 +134,31 @@ export default function LojaPage() {
 
     fetchCartCount();
   }, [store]);
+
+  // Detectar scroll para mostrar carrinho flutuante
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollTop =
+            window.pageYOffset ||
+            document.documentElement.scrollTop ||
+            document.body.scrollTop;
+          setShowFloatingCart(scrollTop > 200); // Mostrar após 200px de scroll
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Verificar scroll inicial
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const addToCart = async (product) => {
     // Verificar se o usuário está logado
@@ -418,28 +444,32 @@ export default function LojaPage() {
                   <span>{store.isOpen ? "Fechar Loja" : "Abrir Loja"}</span>
                 </button>
               )}
-              <Link
-                href={`/lojas/${slug}/carrinho`}
-                className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 flex items-center justify-center text-sm sm:text-base"
-              >
-                <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {!store.isOwner && (
+                <Link
+                  href={`/lojas/${slug}/carrinho`}
+                  className={`bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 flex items-center justify-center text-sm sm:text-base ${
+                    showFloatingCart && cartItemCount > 0 ? "hidden" : ""
+                  }`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13l-1.1 5M7 13h10m0 0v8a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"
-                  />
-                </svg>
-                <span className="hidden sm:inline">
-                  Carrinho ({cartItemCount})
-                </span>
-                <span className="sm:hidden">Carrinho ({cartItemCount})</span>
-              </Link>
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13l-1.1 5M7 13h10m0 0v8a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">
+                    Carrinho ({cartItemCount})
+                  </span>
+                  <span className="sm:hidden">Carrinho ({cartItemCount})</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -698,6 +728,37 @@ export default function LojaPage() {
           </div>
         )}
       </div>
+
+      {/* Carrinho Flutuante */}
+      {showFloatingCart && cartItemCount > 0 && !store?.isOwner && (
+        <div className="fixed top-4 right-4 z-[9999] md:top-4 md:right-4 pointer-events-none safe-area-inset">
+          <Link
+            href={`/lojas/${slug}/carrinho`}
+            className="bg-green-600 text-white rounded-full p-3 md:p-4 shadow-2xl hover:bg-green-700 transition-all duration-300 hover:scale-110 flex items-center justify-center relative pointer-events-auto border-2 border-white"
+            title="Ver carrinho"
+            style={{ zIndex: 9999 }}
+          >
+            <svg
+              className="w-5 h-5 md:w-6 md:h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13l-1.1 5M7 13h10m0 0v8a2 2 0 01-2 2H9a2 2 0 01-2-2v-8z"
+              />
+            </svg>
+            {cartItemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                {cartItemCount}
+              </span>
+            )}
+          </Link>
+        </div>
+      )}
 
       <Footer />
     </div>
