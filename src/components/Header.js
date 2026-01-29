@@ -12,7 +12,7 @@ export default function Header() {
         {/* Logo centralizado no topo */}
         <div className="text-center py-4">
           <Link href="/" className="text-2xl font-bold text-gray-900">
-            Tiago Delivery
+            Nosso Local
           </Link>
         </div>
 

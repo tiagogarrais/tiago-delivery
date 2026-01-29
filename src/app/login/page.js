@@ -40,7 +40,7 @@ function LoginForm() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <Link href="/" className="text-2xl font-bold text-gray-900">
-                Tiago Delivery
+                Nosso Local
               </Link>
             </div>
             <nav className="hidden md:flex space-x-8">
