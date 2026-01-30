@@ -18,6 +18,7 @@ export default function StoreForm({
   const [image, setImage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadTimeout, setUploadTimeout] = useState(null);
+  const [copied, setCopied] = useState(false);
   const [category, setCategory] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [phone, setPhone] = useState("");
@@ -111,7 +112,7 @@ export default function StoreForm({
       setZipCodeLoading(true);
       try {
         const response = await fetch(
-          `https://viacep.com.br/ws/${cleanZipCode}/json/`,
+          `https://viacep.com.br/ws/${cleanZipCode}/json/`
         );
         const data = await response.json();
 
@@ -120,7 +121,7 @@ export default function StoreForm({
           const cityData = cities.find(
             (city) =>
               city.name.toLowerCase() === data.localidade.toLowerCase() &&
-              city.state_id.toString() === stateCode,
+              city.state_id.toString() === stateCode
           );
 
           // Só atualizar se a API retornar valores
@@ -173,7 +174,7 @@ export default function StoreForm({
     setSlugChecking(true);
     try {
       const response = await fetch(
-        `/api/stores/check-slug?slug=${encodeURIComponent(slug)}`,
+        `/api/stores/check-slug?slug=${encodeURIComponent(slug)}`
       );
       const data = await response.json();
       setSlugAvailable(data.available);
@@ -190,6 +191,14 @@ export default function StoreForm({
     const cleanValue = value.toLowerCase().replace(/[^a-z0-9]/g, "");
     setSlug(cleanValue);
     setSlugAvailable(null); // Reset availability check when slug changes
+  };
+
+  const copyStoreLink = () => {
+    if (slug) {
+      navigator.clipboard.writeText(`https://nossolocal.com.br/lojas/${slug}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 4000);
+    }
   };
 
   const formContent = (
@@ -215,48 +224,108 @@ export default function StoreForm({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Identificação Única da Loja *
           </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={slug}
-              onChange={(e) => handleSlugChange(e.target.value)}
-              disabled={!!initialData} // Desabilitar se estiver editando
-              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                !!initialData
-                  ? "bg-gray-100 text-gray-500 cursor-not-allowed" // Estilo desabilitado
-                  : slugAvailable === true
-                    ? "border-green-500"
-                    : slugAvailable === false
+          {initialData && slug ? (
+            // Mostrar link da loja quando estiver editando
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-gray-700 mb-2">Link da sua loja:</p>
+              <div className="flex items-center space-x-2">
+                <div className="flex-1 bg-gray-100 p-4 rounded-lg font-mono text-gray-900 break-all">
+                  https://nossolocal.com.br/lojas/{slug}
+                </div>
+                <button
+                  type="button"
+                  onClick={copyStoreLink}
+                  className="bg-blue-600 text-white px-4 py-4 rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
+                  title="Copiar link da loja"
+                >
+                  {copied ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </span>
+                  )}
+                </button>
+              </div>
+              {copied && (
+                <p className="text-sm text-green-600 mt-2">
+                  ✓ Link copiado para a área de transferência!
+                </p>
+              )}
+              <p className="text-gray-500 text-xs mt-2">
+                A identificação única não pode ser alterada após a criação da
+                loja.
+              </p>
+            </div>
+          ) : (
+            // Mostrar input e botão verificar quando estiver criando
+            <>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    slugAvailable === true
+                      ? "border-green-500"
+                      : slugAvailable === false
                       ? "border-red-500"
                       : "border-gray-300"
-              }`}
-              placeholder="exemplo-loja123"
-              required
-            />
-            <button
-              type="button"
-              onClick={checkSlugAvailability}
-              disabled={!slug.trim() || slugChecking || !!initialData} // Desabilitar se estiver editando
-              className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-              {slugChecking ? "Verificando..." : "Verificar"}
-            </button>
-          </div>
-          {slugAvailable === true && !initialData && (
-            <p className="text-green-600 text-sm mt-1">
-              ✓ Identificação disponível
-            </p>
+                  }`}
+                  placeholder="exemplo-loja123"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={checkSlugAvailability}
+                  disabled={!slug.trim() || slugChecking}
+                  className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {slugChecking ? "Verificando..." : "Verificar"}
+                </button>
+              </div>
+              {slugAvailable === true && (
+                <p className="text-green-600 text-sm mt-1">
+                  ✓ Identificação disponível
+                </p>
+              )}
+              {slugAvailable === false && (
+                <p className="text-red-600 text-sm mt-1">
+                  ✗ Identificação já em uso
+                </p>
+              )}
+              <p className="text-gray-500 text-xs mt-1">
+                Use apenas letras minúsculas e números. Esta identificação será
+                usada na URL da sua loja.
+              </p>
+            </>
           )}
-          {slugAvailable === false && !initialData && (
-            <p className="text-red-600 text-sm mt-1">
-              ✗ Identificação já em uso
-            </p>
-          )}
-          <p className="text-gray-500 text-xs mt-1">
-            {initialData
-              ? "A identificação única não pode ser alterada após a criação da loja."
-              : "Use apenas letras minúsculas e números. Esta identificação será usada na URL da sua loja."}
-          </p>
         </div>
 
         {/* Descrição */}
@@ -358,7 +427,7 @@ export default function StoreForm({
                 imageUrl = result.info.files[0].uploadInfo.secure_url;
                 console.log(
                   "Image URL from result.info.files[0].uploadInfo.secure_url:",
-                  imageUrl,
+                  imageUrl
                 );
               }
               // 2. Tentar result.info.secure_url (estrutura padrão)
@@ -380,7 +449,7 @@ export default function StoreForm({
                 imageUrl = result.data.info.files[0].uploadInfo.secure_url;
                 console.log(
                   "Image URL from result.data.info.files[0]:",
-                  imageUrl,
+                  imageUrl
                 );
               }
               // 5. Tentar result.data.info (estrutura alternativa)
@@ -388,7 +457,7 @@ export default function StoreForm({
                 imageUrl = result.data.info.secure_url;
                 console.log(
                   "Image URL from result.data.info.secure_url:",
-                  imageUrl,
+                  imageUrl
                 );
               }
 
@@ -399,7 +468,7 @@ export default function StoreForm({
               } else {
                 console.error(
                   "No image URL found in onQueuesEnd. Full result:",
-                  JSON.stringify(result),
+                  JSON.stringify(result)
                 );
                 // Resetar loading mesmo sem imagem
                 setUploadingImage(false);
@@ -419,7 +488,7 @@ export default function StoreForm({
                 "Widget closed - uploadingImage:",
                 uploadingImage,
                 "- image:",
-                image,
+                image
               );
               // onQueuesEnd já deve ter sido chamado, então apenas garantir reset
               setTimeout(() => {
