@@ -16,8 +16,8 @@ export default function Header() {
             <Image
               src="/logo.png"
               alt="Logomarca do site Nosso Local"
-              width={150}
-              height={64}
+              width={300}
+              height={128}
               className="mx-auto"
             />
           </Link>
