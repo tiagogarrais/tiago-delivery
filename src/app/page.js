@@ -6,12 +6,43 @@ import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
+const stateSiglas = {
+  11: "RO",
+  12: "AC",
+  13: "AM",
+  14: "RR",
+  15: "PA",
+  16: "AP",
+  17: "TO",
+  21: "MA",
+  22: "PI",
+  23: "CE",
+  24: "RN",
+  25: "PB",
+  26: "PE",
+  27: "AL",
+  28: "SE",
+  29: "BA",
+  31: "MG",
+  32: "ES",
+  33: "RJ",
+  35: "SP",
+  41: "PR",
+  42: "SC",
+  43: "RS",
+  50: "MS",
+  51: "MT",
+  52: "GO",
+  53: "DF",
+};
+
 export default function Home() {
   const { data: session, status } = useSession();
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [states, setStates] = useState({});
   const [cities, setCities] = useState([]);
+  const [stores, setStores] = useState([]);
 
   // Carregar localização salva do localStorage
   useEffect(() => {
@@ -46,6 +77,21 @@ export default function Home() {
     };
 
     loadStatesData();
+  }, []);
+
+  // Carregar lojas ativas
+  useEffect(() => {
+    const loadStores = async () => {
+      try {
+        const response = await fetch("/api/stores");
+        const data = await response.json();
+        setStores(data.stores);
+      } catch (error) {
+        console.error("Erro ao carregar lojas:", error);
+      }
+    };
+
+    loadStores();
   }, []);
 
   // Atualizar cidades quando o estado mudar
@@ -165,6 +211,40 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Lista de Lojas Ativas */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+            Lojas Disponíveis na Plataforma
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {stores.map((store) => (
+              <div
+                key={store.id}
+                className="bg-gray-50 p-6 rounded-lg shadow-md min-h-80 flex flex-col items-center text-center"
+              >
+                {store.image && (
+                  <img
+                    src={store.image}
+                    alt={store.name}
+                    className="w-full aspect-square object-cover rounded-md mb-4"
+                  />
+                )}
+                <Link
+                  href={`/lojas/${store.slug}`}
+                  className="text-xl font-semibold text-blue-600 hover:text-blue-800"
+                >
+                  {store.name}
+                </Link>
+                <p className="text-gray-600 mt-2">
+                  {store.city}, {stateSiglas[store.state] || store.state}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
