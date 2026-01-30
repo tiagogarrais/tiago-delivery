@@ -2,17 +2,24 @@
 
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Header() {
   const { data: session } = useSession();
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-[#F5F6F0] shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Logo centralizado no topo */}
         <div className="text-center py-4">
-          <Link href="/" className="text-2xl font-bold text-gray-900">
-            Nosso Local
+          <Link href="/">
+            <Image
+              src="/logo.png"
+              alt="Logomarca do site Nosso Local"
+              width={150}
+              height={64}
+              className="mx-auto"
+            />
           </Link>
         </div>
 
