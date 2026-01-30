@@ -109,11 +109,13 @@ export default function Home() {
                     >
                       <option value="">Selecione o estado</option>
                       {states.states &&
-                        Object.entries(states.states).map(([code, name]) => (
-                          <option key={code} value={code}>
-                            {name}
-                          </option>
-                        ))}
+                        Object.entries(states.states)
+                          .sort((a, b) => a[1].localeCompare(b[1]))
+                          .map(([code, name]) => (
+                            <option key={code} value={code}>
+                              {name}
+                            </option>
+                          ))}
                     </select>
                   </div>
 
