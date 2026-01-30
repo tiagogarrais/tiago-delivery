@@ -21,7 +21,7 @@ export async function GET(request) {
     if (!isAdmin(session.user.email)) {
       return NextResponse.json(
         { error: "Acesso negado. Você não é administrador." },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -108,7 +108,62 @@ export async function GET(request) {
     console.error("Erro ao buscar logs de vendas:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+
+    if (!isAdmin(session.user.email)) {
+      return NextResponse.json(
+        { error: "Acesso negado. Você não é administrador." },
+        { status: 403 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID do log é obrigatório" },
+        { status: 400 }
+      );
+    }
+
+    // Verificar se o log existe
+    const log = await prisma.salesLog.findUnique({
+      where: { id },
+    });
+
+    if (!log) {
+      return NextResponse.json(
+        { error: "Log de venda não encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // Deletar o log
+    await prisma.salesLog.delete({
+      where: { id },
+    });
+
+    return NextResponse.json(
+      { message: "Log de venda deletado com sucesso" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Erro ao deletar log de venda:", error);
+    return NextResponse.json(
+      { error: "Erro interno do servidor" },
+      { status: 500 }
     );
   }
 }

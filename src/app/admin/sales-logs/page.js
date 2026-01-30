@@ -32,6 +32,7 @@ export default function SalesLogsPage() {
     endDate: "",
   });
   const [selectedLog, setSelectedLog] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -90,6 +91,38 @@ export default function SalesLogsPage() {
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleDeleteLog = async (logId) => {
+    if (
+      !confirm(
+        "Tem certeza que deseja excluir este log de venda? Esta ação não pode ser desfeita."
+      )
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/admin/sales-logs?id=${logId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Erro ao deletar log");
+      }
+
+      // Fechar modal e recarregar lista
+      setSelectedLog(null);
+      await fetchLogs();
+      alert("Log de venda deletado com sucesso!");
+    } catch (err) {
+      console.error("Erro ao deletar log:", err);
+      alert(`Erro ao deletar log: ${err.message}`);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const clearFilters = () => {
@@ -375,7 +408,7 @@ export default function SalesLogsPage() {
                 Mostrando {(pagination.page - 1) * pagination.limit + 1} a{" "}
                 {Math.min(
                   pagination.page * pagination.limit,
-                  pagination.totalCount,
+                  pagination.totalCount
                 )}{" "}
                 de {pagination.totalCount} resultados
               </div>
@@ -691,6 +724,60 @@ export default function SalesLogsPage() {
                   <p>
                     <strong>Status no momento:</strong>{" "}
                     {selectedLog.orderStatus}
+                  </p>
+                </div>
+
+                {/* Botão de Exclusão */}
+                <div className="border-t pt-4">
+                  <button
+                    onClick={() => handleDeleteLog(selectedLog.id)}
+                    disabled={deleting}
+                    className="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
+                  >
+                    {deleting ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        <span>Excluindo...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        <span>Excluir Venda</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="text-xs text-gray-500 text-center mt-2">
+                    ⚠️ Atenção: Esta ação é permanente e não pode ser desfeita
                   </p>
                 </div>
               </div>
