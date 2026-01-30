@@ -6,7 +6,7 @@ export const metadata = {
   title: "Tiago Delivery",
   description: "Uma vitrine virtual para o comércio local",
   verification: {
-    google: "bqOtsnpx-RY6ruUImnu2NpIz3109LJtN0zxzGWw1kZY",
+    google: "D1VrU2-MBaQS5OfUt2DAcErgME0Ht0Tord2YhSdSrYo",
   },
 };
 
