@@ -543,10 +543,17 @@ export default function LojaPage() {
             <div className="ml-3">
               <p className="text-center text-sm text-yellow-700">
                 <strong>
-                  No momento esta loja virtual não está recebendo pedidos
+                  No momento, esta loja não está recebendo pedidos online
                 </strong>{" "}
                 - Gostou do que viu? Essa oferta pode ser obtida diretamente na
-                loja física!
+                loja física localizada em{" "}
+                <strong>
+                  {store.street}, {store.number}
+                  {store.complement && ` - ${store.complement}`}
+                  {store.neighborhood && `, ${store.neighborhood}`},{" "}
+                  {store.city}/{getStateDisplay(store.state)}
+                </strong>
+                .
               </p>
             </div>
           </div>
