@@ -76,7 +76,7 @@ export default function LojaPage() {
 
         // Buscar loja pelo slug
         const storeResponse = await fetch(
-          `/api/stores?slug=${encodeURIComponent(slug)}`,
+          `/api/stores?slug=${encodeURIComponent(slug)}`
         );
         if (!storeResponse.ok) {
           throw new Error("Loja não encontrada");
@@ -93,7 +93,7 @@ export default function LojaPage() {
 
         // Buscar produtos da loja
         const productsResponse = await fetch(
-          `/api/products?storeId=${foundStore.id}`,
+          `/api/products?storeId=${foundStore.id}`
         );
         if (productsResponse.ok) {
           const productsData = await productsResponse.json();
@@ -122,7 +122,7 @@ export default function LojaPage() {
           if (data.cart && data.cart.storeId === store.id) {
             const count = data.cart.items.reduce(
               (total, item) => total + item.quantity,
-              0,
+              0
             );
             setCartItemCount(count);
           }
@@ -164,7 +164,7 @@ export default function LojaPage() {
     // Verificar se o usuário está logado
     if (!session) {
       router.push(
-        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
+        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
       );
       return;
     }
@@ -190,7 +190,7 @@ export default function LojaPage() {
         if (data.cart && data.cart.storeId === store.id) {
           const count = data.cart.items.reduce(
             (total, item) => total + item.quantity,
-            0,
+            0
           );
           setCartItemCount(count);
         }
@@ -321,7 +321,7 @@ export default function LojaPage() {
                         : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {store.isOpen ? "Aberta" : "Fechada"}
+                    {store.isOpen ? "Aberta" : "Delivery fechado"}
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -441,7 +441,9 @@ export default function LojaPage() {
                       )}
                     </svg>
                   )}
-                  <span>{store.isOpen ? "Fechar Loja" : "Abrir Loja"}</span>
+                  <span>
+                    {store.isOpen ? "Fechar Delivery" : "Abrir Delivery"}
+                  </span>
                 </button>
               )}
               {!store.isOwner && (
@@ -523,8 +525,8 @@ export default function LojaPage() {
 
       {/* Aviso de Loja Fechada */}
       {!store.isOpen && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 sm:mx-6 lg:mx-8">
-          <div className="flex">
+        <div className="bg-yellow-50 p-4 mx-4 sm:mx-6 lg:mx-8">
+          <div className="flex items-center justify-center">
             <div className="flex-shrink-0">
               <svg
                 className="h-5 w-5 text-yellow-400"
@@ -539,10 +541,12 @@ export default function LojaPage() {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                <strong>Loja temporariamente fechada</strong> - Esta loja não
-                está aceitando pedidos no momento, mas você pode visualizar os
-                produtos disponíveis.
+              <p className="text-center text-sm text-yellow-700">
+                <strong>
+                  No momento esta loja virtual não está recebendo pedidos
+                </strong>{" "}
+                - Gostou do que viu? Essa oferta pode ser obtida diretamente na
+                loja física!
               </p>
             </div>
           </div>
@@ -689,7 +693,7 @@ export default function LojaPage() {
                               ...
                             </span>
                           ) : !store.isOpen ? (
-                            "Loja Fechada"
+                            "Delivery fechado"
                           ) : (
                             "Adicionar"
                           )}

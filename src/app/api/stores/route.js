@@ -47,9 +47,7 @@ export async function GET(request) {
     }
 
     // Construir filtros baseados nos parâmetros
-    const whereClause = {
-      isOpen: true,
-    };
+    const whereClause = {};
 
     if (city) {
       whereClause.city = {

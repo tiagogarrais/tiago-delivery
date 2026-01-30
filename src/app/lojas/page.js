@@ -53,7 +53,9 @@ function LojasContent() {
       try {
         setLoading(true);
         const response = await fetch(
-          `/api/stores?city=${encodeURIComponent(cidade)}&state=${encodeURIComponent(estado)}`,
+          `/api/stores?city=${encodeURIComponent(
+            cidade
+          )}&state=${encodeURIComponent(estado)}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -157,7 +159,7 @@ function LojasContent() {
                     </h3>
                     {!store.isOpen && (
                       <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                        Fechada
+                        Delivery fechado
                       </span>
                     )}
                   </div>

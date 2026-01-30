@@ -41,12 +41,12 @@ export default function ProductPage() {
 
         // Buscar loja do produto
         const storeResponse = await fetch(
-          `/api/stores?id=${productData.product.storeId}`,
+          `/api/stores?id=${productData.product.storeId}`
         );
         if (storeResponse.ok) {
           const storeData = await storeResponse.json();
           const foundStore = storeData.stores?.find(
-            (s) => s.id === productData.product.storeId,
+            (s) => s.id === productData.product.storeId
           );
           setStore(foundStore);
         }
@@ -65,7 +65,7 @@ export default function ProductPage() {
   const addToCart = async () => {
     if (!session) {
       router.push(
-        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
+        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
       );
       return;
     }
@@ -219,7 +219,7 @@ export default function ProductPage() {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {store.isOpen ? "Aberta" : "Fechada"}
+                        {store.isOpen ? "Aberta" : "Delivery fechado"}
                       </span>
                       {store.category && (
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
@@ -243,7 +243,9 @@ export default function ProductPage() {
                   </button>
                 ) : !session ? (
                   <Link
-                    href={`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`}
+                    href={`/login?callbackUrl=${encodeURIComponent(
+                      window.location.pathname
+                    )}`}
                     className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 font-semibold text-lg transition-colors text-center block"
                   >
                     Fazer Login para Comprar
