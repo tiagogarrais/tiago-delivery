@@ -13,6 +13,11 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
+  const [settings, setSettings] = useState({
+    emailOnNewUser: false,
+    emailOnNewStore: false,
+  });
+  const [savingSettings, setSavingSettings] = useState({});
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -22,6 +27,7 @@ export default function AdminPage() {
 
     if (status === "authenticated") {
       fetchAdminData();
+      fetchSettings();
     }
   }, [status, router]);
 
@@ -48,6 +54,47 @@ export default function AdminPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch("/api/admin/settings");
+
+      if (response.ok) {
+        const result = await response.json();
+        setSettings(result.settings || {});
+      }
+    } catch (err) {
+      console.error("Erro ao carregar configurações:", err);
+    }
+  };
+
+  const handleSettingChange = async (key, value) => {
+    setSavingSettings((prev) => ({ ...prev, [key]: true }));
+
+    try {
+      const response = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ key, value }),
+      });
+
+      if (response.ok) {
+        setSettings((prev) => ({ ...prev, [key]: value }));
+      } else {
+        console.error("Erro ao salvar configuração");
+        // Reverter o valor em caso de erro
+        setSettings((prev) => ({ ...prev, [key]: !value }));
+      }
+    } catch (err) {
+      console.error("Erro ao salvar configuração:", err);
+      // Reverter o valor em caso de erro
+      setSettings((prev) => ({ ...prev, [key]: !value }));
+    } finally {
+      setSavingSettings((prev) => ({ ...prev, [key]: false }));
     }
   };
 
@@ -153,6 +200,108 @@ export default function AdminPage() {
             </svg>
             <span>Ver Logs de Vendas</span>
           </button>
+        </div>
+
+        {/* Seção de Configurações */}
+        <div className="bg-white rounded-lg shadow mb-8">
+          <div className="p-6 border-b">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+              <svg
+                className="w-6 h-6 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              Configurações de Notificações
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Configure quando os administradores devem receber notificações por
+              e-mail
+            </p>
+          </div>
+          <div className="p-6 space-y-6">
+            {/* Toggle para novo usuário */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-base font-medium text-gray-900">
+                  Novo Usuário Cadastrado
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Enviar e-mail para administradores quando um novo usuário se
+                  cadastrar no sistema
+                </p>
+              </div>
+              <button
+                onClick={() =>
+                  handleSettingChange(
+                    "emailOnNewUser",
+                    !settings.emailOnNewUser
+                  )
+                }
+                disabled={savingSettings.emailOnNewUser}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  settings.emailOnNewUser ? "bg-blue-600" : "bg-gray-200"
+                } ${
+                  savingSettings.emailOnNewUser ? "opacity-50 cursor-wait" : ""
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.emailOnNewUser ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Divisor */}
+            <div className="border-t border-gray-200"></div>
+
+            {/* Toggle para nova loja */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-base font-medium text-gray-900">
+                  Nova Loja Cadastrada
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Enviar e-mail para administradores quando uma nova loja for
+                  cadastrada no sistema
+                </p>
+              </div>
+              <button
+                onClick={() =>
+                  handleSettingChange(
+                    "emailOnNewStore",
+                    !settings.emailOnNewStore
+                  )
+                }
+                disabled={savingSettings.emailOnNewStore}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  settings.emailOnNewStore ? "bg-blue-600" : "bg-gray-200"
+                } ${
+                  savingSettings.emailOnNewStore ? "opacity-50 cursor-wait" : ""
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.emailOnNewStore ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Cards de Estatísticas */}
@@ -348,7 +497,7 @@ export default function AdminPage() {
                       <td className="px-4 py-3">
                         <span
                           className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                            order.status,
+                            order.status
                           )}`}
                         >
                           {getStatusLabel(order.status)}

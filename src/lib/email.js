@@ -1,5 +1,22 @@
 import nodemailer from "nodemailer";
 
+// Criar transporter reutilizável
+let transporter = null;
+
+function getTransporter() {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_SERVER_HOST,
+      port: process.env.EMAIL_SERVER_PORT,
+      auth: {
+        user: process.env.EMAIL_SERVER_USER,
+        pass: process.env.EMAIL_SERVER_PASSWORD,
+      },
+    });
+  }
+  return transporter;
+}
+
 export async function sendVerificationRequest({
   identifier: email,
   url,
@@ -20,6 +37,158 @@ export async function sendVerificationRequest({
 
   await transporter.sendMail(message);
 }
+
+// Função para enviar notificação aos administradores sobre novo usuário
+export async function sendNewUserNotificationToAdmins({ user }) {
+  const adminEmails = process.env.ADMIN_EMAILS || "";
+  const adminList = adminEmails
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+
+  if (adminList.length === 0) {
+    console.log("Nenhum e-mail de administrador configurado.");
+    return;
+  }
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #2563eb;">👤 Novo Usuário Cadastrado!</h2>
+      
+      <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin: 0; color: #1f2937;">Detalhes do Usuário</h3>
+        <p><strong>Nome:</strong> ${user.name || "Não informado"}</p>
+        <p><strong>E-mail:</strong> ${user.email}</p>
+        <p><strong>Data de Cadastro:</strong> ${new Date(
+          user.createdAt
+        ).toLocaleString("pt-BR")}</p>
+      </div>
+
+      <div style="margin-top: 20px; text-align: center; color: #6b7280; font-size: 14px;">
+        <p>Este é um email automático do sistema de delivery.</p>
+      </div>
+    </div>
+  `;
+
+  const textContent = `
+    Novo Usuário Cadastrado
+    
+    Nome: ${user.name || "Não informado"}
+    E-mail: ${user.email}
+    Data de Cadastro: ${new Date(user.createdAt).toLocaleString("pt-BR")}
+  `;
+
+  const message = {
+    to: adminList,
+    from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
+    subject: `👤 Novo Usuário Cadastrado - ${user.email}`,
+    text: textContent,
+    html: htmlContent,
+  };
+
+  await getTransporter().sendMail(message);
+}
+
+// Função para enviar notificação aos administradores sobre nova loja
+export async function sendNewStoreNotificationToAdmins({ store, owner }) {
+  const adminEmails = process.env.ADMIN_EMAILS || "";
+  const adminList = adminEmails
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+
+  if (adminList.length === 0) {
+    console.log("Nenhum e-mail de administrador configurado.");
+    return;
+  }
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #10b981;">🏪 Nova Loja Cadastrada!</h2>
+      
+      <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin: 0; color: #1f2937;">Detalhes da Loja</h3>
+        <p><strong>Nome:</strong> ${store.name}</p>
+        <p><strong>Slug:</strong> ${store.slug}</p>
+        <p><strong>Categoria:</strong> ${store.category}</p>
+        <p><strong>CNPJ:</strong> ${store.cnpj}</p>
+        <p><strong>Telefone:</strong> ${store.phone}</p>
+        <p><strong>E-mail:</strong> ${store.email}</p>
+        <p><strong>Cidade:</strong> ${store.city}/${store.state}</p>
+        ${
+          store.description
+            ? `<p><strong>Descrição:</strong> ${store.description}</p>`
+            : ""
+        }
+      </div>
+
+      <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin: 0; color: #1f2937;">Proprietário</h3>
+        <p><strong>Nome:</strong> ${owner.name || "Não informado"}</p>
+        <p><strong>E-mail:</strong> ${owner.email}</p>
+      </div>
+
+      <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin: 0; color: #1f2937;">Endereço</h3>
+        <p>${store.street}, ${store.number}${
+    store.complement ? ` - ${store.complement}` : ""
+  }</p>
+        <p>${store.neighborhood}</p>
+        <p>${store.city} - ${store.state}</p>
+        <p>CEP: ${store.zipCode}</p>
+      </div>
+
+      <div style="margin-top: 20px; padding: 15px; background-color: #dbeafe; border-radius: 8px; text-align: center;">
+        <p style="margin: 0; color: #1e40af;">
+          Data de Cadastro: ${new Date(store.createdAt).toLocaleString("pt-BR")}
+        </p>
+      </div>
+
+      <div style="margin-top: 20px; text-align: center; color: #6b7280; font-size: 14px;">
+        <p>Este é um email automático do sistema de delivery.</p>
+      </div>
+    </div>
+  `;
+
+  const textContent = `
+    Nova Loja Cadastrada
+    
+    Detalhes da Loja:
+    Nome: ${store.name}
+    Slug: ${store.slug}
+    Categoria: ${store.category}
+    CNPJ: ${store.cnpj}
+    Telefone: ${store.phone}
+    E-mail: ${store.email}
+    Cidade: ${store.city}/${store.state}
+    ${store.description ? `Descrição: ${store.description}` : ""}
+    
+    Proprietário:
+    Nome: ${owner.name || "Não informado"}
+    E-mail: ${owner.email}
+    
+    Endereço:
+    ${store.street}, ${store.number}${
+    store.complement ? ` - ${store.complement}` : ""
+  }
+    ${store.neighborhood}
+    ${store.city} - ${store.state}
+    CEP: ${store.zipCode}
+    
+    Data de Cadastro: ${new Date(store.createdAt).toLocaleString("pt-BR")}
+  `;
+
+  const message = {
+    to: adminList,
+    from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
+    subject: `🏪 Nova Loja Cadastrada - ${store.name}`,
+    text: textContent,
+    html: htmlContent,
+  };
+
+  await getTransporter().sendMail(message);
+}
+
 // Função para enviar notificação de novo pedido para a loja
 export async function sendOrderNotificationToStore({
   storeEmail,
@@ -38,11 +207,19 @@ export async function sendOrderNotificationToStore({
     .map(
       (item) =>
         `<tr>
-      <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.productName}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatPrice(item.price)}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatPrice(item.price * item.quantity)}</td>
-    </tr>`,
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${
+        item.productName
+      }</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${
+        item.quantity
+      }</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatPrice(
+        item.price
+      )}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatPrice(
+        item.price * item.quantity
+      )}</td>
+    </tr>`
     )
     .join("");
 
@@ -54,21 +231,53 @@ export async function sendOrderNotificationToStore({
         <h3 style="margin: 0; color: #1f2937;">Detalhes do Pedido</h3>
         <p><strong>Número:</strong> #${order.id.slice(-8).toUpperCase()}</p>
         <p><strong>Cliente:</strong> ${customerName}</p>
-        <p><strong>Telefone:</strong> ${order.customerPhone || "Não informado"}</p>
-        <p><strong>Data:</strong> ${new Date(order.createdAt).toLocaleString("pt-BR")}</p>
-        <p><strong>Pagamento:</strong> ${order.paymentMethod === "pix" ? "PIX" : order.paymentMethod === "cash" ? "Dinheiro" : order.paymentMethod}</p>
-        ${order.needsChange ? `<p><strong>Troco para:</strong> ${formatPrice(order.changeAmount)}</p>` : ""}
-        <p><strong>Tipo de Entrega:</strong> ${order.deliveryType === "pickup" ? "🏪 Retirada na Loja" : "🚚 Entrega em Domicílio"}</p>
+        <p><strong>Telefone:</strong> ${
+          order.customerPhone || "Não informado"
+        }</p>
+        <p><strong>Data:</strong> ${new Date(order.createdAt).toLocaleString(
+          "pt-BR"
+        )}</p>
+        <p><strong>Pagamento:</strong> ${
+          order.paymentMethod === "pix"
+            ? "PIX"
+            : order.paymentMethod === "cash"
+            ? "Dinheiro"
+            : order.paymentMethod
+        }</p>
+        ${
+          order.needsChange
+            ? `<p><strong>Troco para:</strong> ${formatPrice(
+                order.changeAmount
+              )}</p>`
+            : ""
+        }
+        <p><strong>Tipo de Entrega:</strong> ${
+          order.deliveryType === "pickup"
+            ? "🏪 Retirada na Loja"
+            : "🚚 Entrega em Domicílio"
+        }</p>
         ${
           order.deliveryType === "delivery" && order.deliveryAddress
             ? `
         <p><strong>Endereço de Entrega:</strong></p>
         <p style="margin-left: 20px; margin-top: 5px;">
-          ${order.deliveryAddress.street}, ${order.deliveryAddress.number}${order.deliveryAddress.complement ? ` - ${order.deliveryAddress.complement}` : ""}<br>
+          ${order.deliveryAddress.street}, ${order.deliveryAddress.number}${
+                order.deliveryAddress.complement
+                  ? ` - ${order.deliveryAddress.complement}`
+                  : ""
+              }<br>
           ${order.deliveryAddress.neighborhood}<br>
           ${order.deliveryAddress.city}, ${order.deliveryAddress.state}<br>
-          ${order.deliveryAddress.zipCode ? `CEP: ${order.deliveryAddress.zipCode}<br>` : ""}
-          ${order.deliveryAddress.reference ? `Referência: ${order.deliveryAddress.reference}` : ""}
+          ${
+            order.deliveryAddress.zipCode
+              ? `CEP: ${order.deliveryAddress.zipCode}<br>`
+              : ""
+          }
+          ${
+            order.deliveryAddress.reference
+              ? `Referência: ${order.deliveryAddress.reference}`
+              : ""
+          }
         </p>
         `
             : ""
@@ -131,27 +340,64 @@ export async function sendOrderNotificationToStore({
     Cliente: ${customerName}
     Telefone: ${order.customerPhone || "Não informado"}
     Data: ${new Date(order.createdAt).toLocaleString("pt-BR")}
-    Pagamento: ${order.paymentMethod === "pix" ? "PIX" : order.paymentMethod === "cash" ? "Dinheiro" : order.paymentMethod}
-    ${order.needsChange ? `Troco para: ${formatPrice(order.changeAmount)}\n` : ""}
-    Tipo de Entrega: ${order.deliveryType === "pickup" ? "Retirada na Loja" : "Entrega em Domicílio"}
+    Pagamento: ${
+      order.paymentMethod === "pix"
+        ? "PIX"
+        : order.paymentMethod === "cash"
+        ? "Dinheiro"
+        : order.paymentMethod
+    }
+    ${
+      order.needsChange
+        ? `Troco para: ${formatPrice(order.changeAmount)}\n`
+        : ""
+    }
+    Tipo de Entrega: ${
+      order.deliveryType === "pickup"
+        ? "Retirada na Loja"
+        : "Entrega em Domicílio"
+    }
     ${
       order.deliveryType === "delivery" && order.deliveryAddress
         ? `
     Endereço de Entrega:
-    ${order.deliveryAddress.street}, ${order.deliveryAddress.number}${order.deliveryAddress.complement ? ` - ${order.deliveryAddress.complement}` : ""}
+    ${order.deliveryAddress.street}, ${order.deliveryAddress.number}${
+            order.deliveryAddress.complement
+              ? ` - ${order.deliveryAddress.complement}`
+              : ""
+          }
     ${order.deliveryAddress.neighborhood}
     ${order.deliveryAddress.city}, ${order.deliveryAddress.state}
-    ${order.deliveryAddress.zipCode ? `CEP: ${order.deliveryAddress.zipCode}` : ""}
-    ${order.deliveryAddress.reference ? `Referência: ${order.deliveryAddress.reference}` : ""}
+    ${
+      order.deliveryAddress.zipCode
+        ? `CEP: ${order.deliveryAddress.zipCode}`
+        : ""
+    }
+    ${
+      order.deliveryAddress.reference
+        ? `Referência: ${order.deliveryAddress.reference}`
+        : ""
+    }
     `
         : ""
     }
     
     Itens do Pedido:
-    ${order.items.map((item) => `- ${item.productName} (${item.quantity}x) - ${formatPrice(item.price * item.quantity)}`).join("\n    ")}
+    ${order.items
+      .map(
+        (item) =>
+          `- ${item.productName} (${item.quantity}x) - ${formatPrice(
+            item.price * item.quantity
+          )}`
+      )
+      .join("\n    ")}
     
     Subtotal: ${formatPrice(order.subtotal)}
-    ${order.deliveryFee > 0 ? `Taxa de entrega: ${formatPrice(order.deliveryFee)}\n    ` : ""}TOTAL: ${formatPrice(order.total)}
+    ${
+      order.deliveryFee > 0
+        ? `Taxa de entrega: ${formatPrice(order.deliveryFee)}\n    `
+        : ""
+    }TOTAL: ${formatPrice(order.total)}
     
     Acesse sua loja para confirmar e preparar este pedido.
   `;
@@ -159,7 +405,9 @@ export async function sendOrderNotificationToStore({
   const message = {
     to: storeEmail,
     from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
-    subject: `🛍️ Novo Pedido - ${storeName} (#${order.id.slice(-8).toUpperCase()})`,
+    subject: `🛍️ Novo Pedido - ${storeName} (#${order.id
+      .slice(-8)
+      .toUpperCase()})`,
     text: textContent,
     html: htmlContent,
   };

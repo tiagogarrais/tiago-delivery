@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { sendNewStoreNotificationToAdmins } from "@/lib/email";
 
 export async function GET(request) {
   try {
@@ -224,6 +225,26 @@ export async function POST(request) {
         zipCode: address.zipCode.trim(),
       },
     });
+
+    // Enviar notificação para administradores se configurado
+    try {
+      const setting = await prisma.adminSettings.findUnique({
+        where: { key: "emailOnNewStore" },
+      });
+
+      if (setting?.value === true) {
+        const owner = await prisma.user.findUnique({
+          where: { id: session.user.id },
+        });
+
+        if (owner) {
+          await sendNewStoreNotificationToAdmins({ store, owner });
+        }
+      }
+    } catch (emailError) {
+      console.error("Erro ao enviar e-mail de nova loja:", emailError);
+      // Não impedir a criação da loja se o e-mail falhar
+    }
 
     return NextResponse.json({ store }, { status: 201 });
   } catch (error) {

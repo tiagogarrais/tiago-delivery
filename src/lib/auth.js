@@ -3,7 +3,10 @@ import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
-import { sendVerificationRequest } from "@/lib/email";
+import {
+  sendVerificationRequest,
+  sendNewUserNotificationToAdmins,
+} from "@/lib/email";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma), // Usar adapter padrão temporariamente
@@ -44,8 +47,29 @@ export const authOptions = {
           isNewUser,
         });
 
-        // Se é novo usuário, verificar se precisa de onboarding
-        if (isNewUser || user?.id) {
+        // Se é novo usuário, enviar notificação para administradores
+        if (isNewUser && user?.id) {
+          try {
+            // Verificar configuração antes de enviar
+            const setting = await prisma.adminSettings.findUnique({
+              where: { key: "emailOnNewUser" },
+            });
+
+            if (setting?.value === true) {
+              const fullUser = await prisma.user.findUnique({
+                where: { id: user.id },
+              });
+
+              if (fullUser) {
+                await sendNewUserNotificationToAdmins({ user: fullUser });
+              }
+            }
+          } catch (emailError) {
+            console.error("Erro ao enviar e-mail de novo usuário:", emailError);
+            // Não impedir o login se o e-mail falhar
+          }
+
+          // Verificar se precisa de onboarding
           const userProfile = await prisma.usuario.findUnique({
             where: { userId: user.id },
           });
