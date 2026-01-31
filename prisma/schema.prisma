@@ -123,6 +123,8 @@ model Store {
   city         String
   state        String
   zipCode      String
+  latitude     Float?
+  longitude    Float?
 
   // Configurações de pedido
   minimumOrder    Float? // Valor mínimo de compras

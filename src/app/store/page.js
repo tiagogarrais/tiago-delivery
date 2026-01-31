@@ -88,6 +88,8 @@ function StorePageContent() {
                 neighborhood: store.neighborhood,
                 city: store.city,
                 state: store.state,
+                latitude: store.latitude,
+                longitude: store.longitude,
               },
             });
           } else {

@@ -76,7 +76,7 @@ export default function LojaPage() {
 
         // Buscar loja pelo slug
         const storeResponse = await fetch(
-          `/api/stores?slug=${encodeURIComponent(slug)}`
+          `/api/stores?slug=${encodeURIComponent(slug)}`,
         );
         if (!storeResponse.ok) {
           throw new Error("Loja não encontrada");
@@ -93,7 +93,7 @@ export default function LojaPage() {
 
         // Buscar produtos da loja
         const productsResponse = await fetch(
-          `/api/products?storeId=${foundStore.id}`
+          `/api/products?storeId=${foundStore.id}`,
         );
         if (productsResponse.ok) {
           const productsData = await productsResponse.json();
@@ -122,7 +122,7 @@ export default function LojaPage() {
           if (data.cart && data.cart.storeId === store.id) {
             const count = data.cart.items.reduce(
               (total, item) => total + item.quantity,
-              0
+              0,
             );
             setCartItemCount(count);
           }
@@ -164,7 +164,7 @@ export default function LojaPage() {
     // Verificar se o usuário está logado
     if (!session) {
       router.push(
-        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
       );
       return;
     }
@@ -190,7 +190,7 @@ export default function LojaPage() {
         if (data.cart && data.cart.storeId === store.id) {
           const count = data.cart.items.reduce(
             (total, item) => total + item.quantity,
-            0
+            0,
           );
           setCartItemCount(count);
         }
@@ -349,6 +349,38 @@ export default function LojaPage() {
                       Frete grátis acima de{" "}
                       {formatPrice(store.freeShippingThreshold)}
                     </span>
+                  </div>
+                )}
+                {/* Link do Google Maps */}
+                {store.latitude && store.longitude && (
+                  <div className="flex items-center mt-2">
+                    <a
+                      href={`https://www.google.com/maps?q=${store.latitude},${store.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      <span className="text-sm underline">Ver no mapa</span>
+                    </a>
                   </div>
                 )}
               </div>

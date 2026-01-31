@@ -34,7 +34,7 @@ export async function GET(request) {
       if (!store) {
         return NextResponse.json(
           { error: "Loja não encontrada" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -78,7 +78,7 @@ export async function GET(request) {
     console.error("Erro ao buscar lojas:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -131,7 +131,7 @@ export async function POST(request) {
       const slugRegex = /^[a-z0-9]+$/;
       if (!slugRegex.test(slug)) {
         errors.push(
-          "Identificação deve conter apenas letras minúsculas e números"
+          "Identificação deve conter apenas letras minúsculas e números",
         );
       } else {
         // Verificar se slug já existe
@@ -223,6 +223,8 @@ export async function POST(request) {
         city: address.city.trim(),
         state: address.state.trim(),
         zipCode: address.zipCode.trim(),
+        latitude: address.latitude || null,
+        longitude: address.longitude || null,
       },
     });
 
@@ -258,13 +260,13 @@ export async function POST(request) {
             "CNPJ já cadastrado. Uma loja com este CNPJ já existe no sistema.",
           ],
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { errors: ["Erro interno do servidor"] },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -313,7 +315,7 @@ export async function PUT(request) {
     if (!currentStore) {
       return NextResponse.json(
         { error: "Loja não encontrada" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -332,7 +334,7 @@ export async function PUT(request) {
       const slugRegex = /^[a-z0-9]+$/;
       if (!slugRegex.test(slug)) {
         errors.push(
-          "Identificação deve conter apenas letras minúsculas e números"
+          "Identificação deve conter apenas letras minúsculas e números",
         );
       } else if (slug.trim() !== currentStore.slug) {
         // Verificar se slug já existe (apenas se mudou)
@@ -393,7 +395,7 @@ export async function PUT(request) {
     if (!existingStore) {
       return NextResponse.json(
         { errors: ["Loja não encontrada"] },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -427,7 +429,7 @@ export async function PUT(request) {
     console.error("Erro ao atualizar loja:", error);
     return NextResponse.json(
       { errors: ["Erro interno do servidor"] },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -457,7 +459,7 @@ export async function DELETE() {
     if (!existingStore) {
       return NextResponse.json(
         { errors: ["Loja não encontrada"] },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -471,7 +473,7 @@ export async function DELETE() {
     console.error("Erro ao deletar loja:", error);
     return NextResponse.json(
       { errors: ["Erro interno do servidor"] },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

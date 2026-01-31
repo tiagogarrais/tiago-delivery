@@ -160,6 +160,8 @@ export async function PUT(request, { params }) {
         city: address.city.trim(),
         state: address.state.trim(),
         zipCode: address.zipCode.trim(),
+        latitude: address.latitude || null,
+        longitude: address.longitude || null,
       },
     });
 
