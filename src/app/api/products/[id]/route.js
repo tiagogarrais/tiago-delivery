@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const { storeId, name, description, price, images, available } =
+    const { storeId, name, description, price, images, available, stock } =
       await request.json();
 
     // Validação básica
@@ -91,6 +91,10 @@ export async function PUT(request, { params }) {
         price: parseFloat(price),
         images: images || [],
         available: available === true,
+        stock:
+          stock !== undefined && stock !== null && stock !== ""
+            ? parseInt(stock)
+            : null,
       },
     });
 

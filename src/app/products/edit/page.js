@@ -67,6 +67,7 @@ function EditProductPageContent() {
               price: product.price,
               images: product.images || [],
               available: product.available,
+              stock: product.stock,
             });
           } else {
             setErrors(["Produto não encontrado"]);

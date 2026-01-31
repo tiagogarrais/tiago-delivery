@@ -82,7 +82,8 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { storeId, name, description, price, images, available } = body;
+    const { storeId, name, description, price, images, available, stock } =
+      body;
 
     const errors = [];
 
@@ -137,6 +138,10 @@ export async function POST(request) {
         price: parseFloat(price.toString().replace(",", ".")),
         images: images || [],
         available: available !== undefined ? available : true,
+        stock:
+          stock !== undefined && stock !== null && stock !== ""
+            ? parseInt(stock)
+            : null,
       },
     });
 

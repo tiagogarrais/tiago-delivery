@@ -687,6 +687,30 @@ export default function LojaPage() {
                         {product.description}
                       </p>
                     )}
+
+                    {/* Indicador de estoque */}
+                    {product.stock !== null && product.stock !== undefined && (
+                      <div className="mb-2">
+                        {product.stock === 0 ? (
+                          <p className="text-sm text-red-600 font-medium">
+                            Produto sem estoque na loja virtual. Entre em
+                            contato com a loja física.
+                          </p>
+                        ) : product.stock <= 5 ? (
+                          <p className="text-sm text-orange-600">
+                            Apenas {product.stock}{" "}
+                            {product.stock === 1
+                              ? "unidade disponível"
+                              : "unidades disponíveis"}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-green-600">
+                            {product.stock} unidades em estoque
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between">
                       <span className="text-xl font-bold text-gray-900">
                         {formatPrice(product.price)}
@@ -704,7 +728,8 @@ export default function LojaPage() {
                           disabled={
                             addingToCart === product.id ||
                             !product.available ||
-                            !store.isOpen
+                            !store.isOpen ||
+                            (product.stock !== null && product.stock === 0)
                           }
                           className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -733,6 +758,8 @@ export default function LojaPage() {
                             </span>
                           ) : !store.isOpen ? (
                             "Delivery fechado"
+                          ) : product.stock !== null && product.stock === 0 ? (
+                            "Sem estoque"
                           ) : (
                             "Adicionar"
                           )}

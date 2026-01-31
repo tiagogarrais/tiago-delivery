@@ -21,6 +21,9 @@ export default function ProductForm({
     price: initialData?.price?.toString() || "",
     images: initialData?.images || [],
     available: initialData?.available ?? true,
+    stock: initialData?.stock?.toString() || "",
+    hasStockControl:
+      initialData?.stock !== null && initialData?.stock !== undefined,
   });
 
   // Atualizar formData quando initialData mudar (importante para edição)
@@ -32,6 +35,9 @@ export default function ProductForm({
         price: initialData.price?.toString() || "",
         images: initialData.images || [],
         available: initialData.available ?? true,
+        stock: initialData?.stock?.toString() || "",
+        hasStockControl:
+          initialData?.stock !== null && initialData?.stock !== undefined,
       });
     }
   }, [initialData]);
@@ -185,13 +191,13 @@ export default function ProductForm({
                     <img
                       src={img}
                       alt={`Imagem ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded-lg"
                     />
                     <button
                       type="button"
                       onClick={() => {
                         const newImages = formData.images.filter(
-                          (_, i) => i !== index
+                          (_, i) => i !== index,
                         );
                         setFormData({ ...formData, images: newImages });
                       }}
@@ -353,6 +359,54 @@ export default function ProductForm({
           </label>
         </div>
 
+        {/* Controle de Estoque */}
+        <div className="border-t pt-6">
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="hasStockControl"
+              checked={formData.hasStockControl}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  hasStockControl: e.target.checked,
+                  stock: e.target.checked ? formData.stock : "",
+                })
+              }
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="hasStockControl"
+              className="ml-2 block text-sm font-medium text-gray-900"
+            >
+              Ativar controle de estoque
+            </label>
+          </div>
+
+          {formData.hasStockControl && (
+            <div className="ml-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Quantidade em Estoque
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={formData.stock}
+                onChange={(e) =>
+                  setFormData({ ...formData, stock: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="0"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                Deixe em branco ou desative o controle para vendas ilimitadas. A
+                cada venda, o estoque será reduzido automaticamente.
+              </p>
+            </div>
+          )}
+        </div>
+
         <div className="flex space-x-4 pt-6">
           <button
             type="submit"
@@ -364,8 +418,8 @@ export default function ProductForm({
                 ? "Atualizando..."
                 : "Cadastrando..."
               : isEditMode
-              ? "Atualizar Produto"
-              : "Cadastrar Produto"}
+                ? "Atualizar Produto"
+                : "Cadastrar Produto"}
           </button>
           <button
             type="button"

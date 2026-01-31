@@ -41,12 +41,12 @@ export default function ProductPage() {
 
         // Buscar loja do produto
         const storeResponse = await fetch(
-          `/api/stores?id=${productData.product.storeId}`
+          `/api/stores?id=${productData.product.storeId}`,
         );
         if (storeResponse.ok) {
           const storeData = await storeResponse.json();
           const foundStore = storeData.stores?.find(
-            (s) => s.id === productData.product.storeId
+            (s) => s.id === productData.product.storeId,
           );
           setStore(foundStore);
         }
@@ -65,7 +65,7 @@ export default function ProductPage() {
   const addToCart = async () => {
     if (!session) {
       router.push(
-        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+        `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
       );
       return;
     }
@@ -201,6 +201,35 @@ export default function ProductPage() {
                 </span>
               </div>
 
+              {/* Stock Information */}
+              {product.stock !== null && product.stock !== undefined && (
+                <div className="mb-6">
+                  {product.stock === 0 ? (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <p className="text-red-800 font-medium">
+                        Produto sem estoque na loja virtual. Entre em contato
+                        com a loja física.
+                      </p>
+                    </div>
+                  ) : product.stock <= 5 ? (
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <p className="text-orange-800 font-medium">
+                        Atenção: Apenas {product.stock}{" "}
+                        {product.stock === 1
+                          ? "unidade disponível"
+                          : "unidades disponíveis"}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <p className="text-green-800 font-medium">
+                        ✓ {product.stock} unidades em estoque
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Store Info Compact */}
               {store && (
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -233,7 +262,10 @@ export default function ProductPage() {
 
               {/* Add to Cart Button */}
               <div className="space-y-4">
-                {product.available && store?.isOpen && session ? (
+                {product.available &&
+                store?.isOpen &&
+                session &&
+                (product.stock === null || product.stock > 0) ? (
                   <button
                     onClick={addToCart}
                     disabled={addingToCart}
@@ -244,7 +276,7 @@ export default function ProductPage() {
                 ) : !session ? (
                   <Link
                     href={`/login?callbackUrl=${encodeURIComponent(
-                      window.location.pathname
+                      window.location.pathname,
                     )}`}
                     className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 font-semibold text-lg transition-colors text-center block"
                   >
@@ -254,6 +286,12 @@ export default function ProductPage() {
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <p className="text-yellow-800 font-medium">
                       Esta loja está fechada no momento
+                    </p>
+                  </div>
+                ) : product.stock !== null && product.stock === 0 ? (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-red-800 font-medium">
+                      Produto sem estoque
                     </p>
                   </div>
                 ) : (

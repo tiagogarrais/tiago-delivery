@@ -183,6 +183,33 @@ export async function POST(request) {
 
     console.log("Loja encontrada:", store.name);
 
+    // Validar estoque dos produtos antes de criar o pedido
+    const stockErrors = [];
+    for (const item of items) {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+
+      if (!product) {
+        stockErrors.push(`Produto "${item.productName}" não encontrado`);
+        continue;
+      }
+
+      // Se o produto tem controle de estoque (stock não é null)
+      if (product.stock !== null) {
+        if (product.stock < item.quantity) {
+          stockErrors.push(
+            `Estoque insuficiente para "${item.productName}". Disponível: ${product.stock}, Solicitado: ${item.quantity}`,
+          );
+        }
+      }
+    }
+
+    if (stockErrors.length > 0) {
+      console.log("Erros de estoque:", stockErrors);
+      return NextResponse.json({ errors: stockErrors }, { status: 400 });
+    }
+
     // Criar o pedido
     console.log("Criando pedido no banco...");
     const order = await prisma.order.create({
@@ -207,6 +234,36 @@ export async function POST(request) {
     });
 
     console.log("Pedido criado com sucesso:", order.id);
+
+    // Atualizar estoque dos produtos
+    try {
+      console.log("Atualizando estoque dos produtos...");
+      for (const item of items) {
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId },
+        });
+
+        // Só atualiza se o produto tem controle de estoque
+        if (product && product.stock !== null) {
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          });
+          console.log(
+            `Estoque do produto ${item.productName} reduzido em ${item.quantity}`,
+          );
+        }
+      }
+      console.log("Estoque atualizado com sucesso");
+    } catch (stockError) {
+      console.error("Erro ao atualizar estoque:", stockError);
+      // Não falhar o pedido se não conseguir atualizar o estoque
+      // mas isso pode causar inconsistência
+    }
 
     // Buscar dados completos do cliente para o log
     let customerProfile = null;

@@ -163,6 +163,7 @@ model Product {
   price       Float
   images      String[] // Campo único para múltiplas imagens
   available   Boolean @default(true)
+  stock       Int?     // Quantidade disponível em estoque (opcional - null = ilimitado)
 
   store     Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
   cartItems CartItem[]
